@@ -57,7 +57,7 @@
                                 </ul>
                             </li>
 
-                            <li><a href="{{ asset('admin/')}}public/categories"><i class="ti-map-alt"></i> <span>Categories</span></a></li>
+                            <li><a href="{{ route('admin.categories') }}"><i class="ti-map-alt"></i> <span>Categories</span></a></li>
                             <li><a href="{{ asset('admin/')}}public/product"><i class="ti-receipt"></i> <span>Products</span></a></li>
 
 
