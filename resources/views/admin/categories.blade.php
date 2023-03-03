@@ -35,11 +35,11 @@
                             <td>{{$i++}}</td>
                             <td>{{$category->category_name}}</td>
                             <td>
-                                <a href="{{ route('edit.category',$category->id) }}" id="updateCategory"  style="float:left; margin-left: 25%; cursor: pointer" class="updateButton">
+                                <a href="{{ route('edit.category',$category->id) }}" id="updateCategory" style="float:left; margin-left: 25%; cursor: pointer" class="updateButton">
                                     <i class="fa fa-edit fa-2x"></i></a>
-                                <span class="DeleteButton" style="float:right; margin-right: 25%" data-id="{{$category->id}}">
+                                <a class="DeleteButton" style="float:right; margin-right: 25%" href="{{ route('delete.category',$category->id) }}" onclick="return confirm('Are You Sure?')">
                                     <i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i>
-                                </span>
+                                </a>    
                             </td>
                         </tr>
                         @endif

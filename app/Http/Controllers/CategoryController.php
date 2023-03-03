@@ -29,13 +29,26 @@ class CategoryController extends Controller
     public function editCategory($id)
     {
             $editCategory = categories::findOrFail($id);
-            return view('admin.edit',compact('editCategory'));
+            return view('admin.categoryEdit',compact('editCategory'));
     }
 
     public function updateCategory(Request $request)
     {
         $updateCategory = categories::findOrFail($request->id)->update([
             'category_name' => $request->txtUpdatecategoryName,
+            'updated_at' => Carbon::now(),
+        ]);
+        $notification = array(
+            'message' => 'Category Updated Successfully',
+            'alert-type' => 'success'
+        );
+        return redirect('/dashboard')->with($notification);
+    }
+
+    public function deleteCategory($id)
+    {
+        $updateCategory = categories::findOrFail($id)->update([
+            'isDelete' => 1,
             'updated_at' => Carbon::now(),
         ]);
         $notification = array(
