@@ -28,10 +28,11 @@ Route::controller(AdminController::class)->group(function(){
 //category Routes
 Route::controller(CategoryController::class)->group(function(){
     Route::get('/dashboard','getCategories')->name('admin.categories')->middleware(['auth', 'verified']);
-    Route::post('add/category','addCategory')->name('add.category')->middleware(['auth', 'verified']);
-    Route::get('/edit/category/{id}','editCategory')->name('edit.category')->middleware(['auth', 'verified']);
+    Route::post('/add/category','addCategory')->name('add.category')->middleware(['auth', 'verified']);
+    Route::post('/edit/category','editCategory')->name('edit.category')->middleware(['auth', 'verified']);
     Route::post('/update/category','updateCategory')->name('update.category')->middleware(['auth', 'verified']);
-    Route::get('/delete/category/{id}','deleteCategory')->name('delete.category')->middleware(['auth', 'verified']);
+    Route::post('/delete/category','deleteCategory')->name('delete.category')->middleware(['auth', 'verified']);
+    Route::get('/categories','getCategoriesForOption')->name('get.categories')->middleware(['auth', 'verified']);
 });
 
 Route::controller(ProductController::class)->group(function(){

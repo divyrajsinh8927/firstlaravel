@@ -27,6 +27,11 @@
     <link rel="stylesheet" href="{{ asset('admin/assets/css/responsive.css')}}">
     <!-- modernizr css -->
     <script src="{{ asset('admin/assets/js/vendor/modernizr-2.8.3.min.js')}}"></script>
+
+    <script src="{{ asset('admin/assets/js/vendor/jquery.min.js')}}"></script>
+
+
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 </head>
 
 <body>

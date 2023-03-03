@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\categories;
 use App\Models\product;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 
@@ -16,13 +17,22 @@ class ProductController extends Controller
         $products = product::select('products.id', 'products.product_name', 'products.product_image', 'Categories.category_name as category_name')
         	->join('categories', 'categories.id', '=', 'products.category_id')
         	->get();
-        // $products = product::latest()->get();
-        $categories = categories::latest()->get();
-        return view('admin.products', compact('products','categories'));
+        return view('admin.products', compact('products'));
     }
 
     public function addproduct(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'productImage' => 'required',
+            'txtProductName' => 'required',
+            'category' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()->all()
+            ]);
+        }
 
         if ($request->file('productImage')) {
             $image = $request->file('productImage');
@@ -36,11 +46,8 @@ class ProductController extends Controller
             'category_id' => $request->category,
             'created_at' => Carbon::now()
         ]);
-        $notification = array(
-            'message' => 'Category Inserted Successfully',
-            'alert-type' => 'success'
-        );
-        return redirect()->back()->with($notification);
+        
+        return response()->json(['success' => 'Product Added successfully.']);
     }
 
     public function editProduct($id)

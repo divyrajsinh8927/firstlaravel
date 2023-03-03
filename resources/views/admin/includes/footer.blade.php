@@ -1,4 +1,3 @@
-<script src="{{ asset('admin/assets/js/vendor/jquery-2.2.4.min.js')}}"></script>
 <!-- bootstrap 4 js -->
 <script src="{{ asset('admin/assets/js/popper.min.js')}}"></script>
 <script src="{{ asset('admin/assets/js/bootstrap.min.js')}}"></script>

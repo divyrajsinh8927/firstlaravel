@@ -71,8 +71,10 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="productForm" method="POST" enctype="multipart/form-data" action="{{ route('add.product') }}">
-                @csrf
+            <form id="productForm" enctype="multipart/form-data">
+                <div class="alert alert-danger print-error-msg" style="display:none">
+                    <ul></ul>
+                </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <img id="blah" src="#" style="width: 120px; height: 120px; text-align: center;display: none;" />
@@ -88,23 +90,20 @@
                     <div class="form-group">
                         <label for="categoryName">Category</label>
                         <select name="category" id="category" placeholder="Select Categoroy" required class="form-control"">
-                        @foreach($categories as $category)
-                        @if($category->isDelete == 0)
-                        <option value=" {{ $category->id }}">{{ $category->category_name }}</option>
-                            @endif
-                            @endforeach
+                       
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer border-top-0 d-flex justify-content-center">
-                    <button type="submit" class="btn btn-success" style="text-align: right;" id="addProduct">Add Product</button>
-                </div>
+                <div class=" modal-footer border-top-0 d-flex justify-content-center">
+                            <button type="submit" class="btn btn-success" style="text-align: right;" id="addProduct">Add Product</button>
+                    </div>
             </form>
         </div>
     </div>
 </div>
 
-<script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
     function showPreview(event) {
         if (event.target.files.length > 0) {
             var src = URL.createObjectURL(event.target.files[0]);
@@ -113,6 +112,79 @@
             preview.style.display = "block";
         }
     }
+
+
+    const fileInput = document.getElementById('productImage');
+
+    fileInput.addEventListener('change', function() {
+        const file = fileInput.files[0];
+        if (file.type != 'image/jpeg' && file.type != 'image/jpg' && file.type != 'image/png') {
+            $("#productForm")[0].reset();
+            alert('Please select a JPEG image file.');
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            alert('The file size exceeds the maximum limit of 10MB.');
+            return;
+        }
+    });
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+
+    var categories = ['<option value="0" disabled selected>Select Category</option>']
+    $.ajax({
+        url: "{{route('get.categories')}}",
+        type: "GET",
+        dataType: 'json',
+        success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+                var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
+                categories.push(row)
+            }
+            $("#category").html(categories);
+        }
+    });
+
+    $('#productForm').submit(function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        $.ajax({
+            type: 'POST',
+            url: "{{ route('add.product') }}",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+                if ($.isEmptyObject(data.error)) {
+                    Swal.fire(
+                        'Inserted!',
+                        'Product has been Inserted.',
+                        'success'
+                    ).then(function() {
+                        location.reload()
+                    })
+                }
+            }
+        });
+    });
+
+
+
+    // function printErrorMsg(msg) {
+    //     $(".print-error-msg").find("ul").html('');
+    //     $(".print-error-msg").css('display', 'block');
+    //     $.each(msg, function(key, value) {
+    //         $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+    //     });
+
+    // }
 </script>
 
 
