@@ -38,9 +38,9 @@ Route::controller(CategoryController::class)->group(function(){
 Route::controller(ProductController::class)->group(function(){
     Route::get('/get/products','getProducts')->name('admin.products')->middleware(['auth', 'verified']);
     Route::post('/add/product','addproduct')->name('add.product')->middleware(['auth', 'verified']);
-    Route::get('/edit/product/{id}','editProduct')->name('edit.product')->middleware(['auth', 'verified']);
+    Route::post('/edit/product','editProduct')->name('edit.product')->middleware(['auth', 'verified']);
     Route::post('/update/product','updateProduct')->name('update.product')->middleware(['auth', 'verified']);
-    Route::get('/delete/product/{id}','deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
+    Route::post('/delete/product','deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
 });
 
 // Route::get('/dashboard', function () {

@@ -14,7 +14,7 @@ class ProductController extends Controller
     public function getProducts()
     {
 
-        $products = product::select('products.id', 'products.product_name', 'products.product_image', 'Categories.category_name as category_name')
+        $products = product::select('products.id', 'products.product_name', 'products.product_image','products.isDelete','Categories.category_name as category_name')
         	->join('categories', 'categories.id', '=', 'products.category_id')
         	->get();
         return view('admin.products', compact('products'));
@@ -50,18 +50,28 @@ class ProductController extends Controller
         return response()->json(['success' => 'Product Added successfully.']);
     }
 
-    public function editProduct($id)
+    public function editProduct(Request $request)
     {
-        $editProduct = product::findOrFail($id);
-        $categories = categories::get();
-        return view('admin.productEdit', compact('editProduct', 'categories'));
+        $editProduct = product::findOrFail($request->id);
+        return response()->json($editProduct);
     }
 
     public function updateProduct(Request $request)
     {
-        $editProduct = product::findOrFail($request->id);
-        if ($request->file('productImage')) {
-            $image = $request->file('productImage');
+        $updatevalidator = Validator::make($request->all(), [
+            'txtUpdateProductName' => 'required',
+            'updateCategory' => 'required',
+        ]);
+
+        if ($updatevalidator->fails()) {
+            return response()->json([
+                'error' => $updatevalidator->errors()->all()
+            ]);
+        }
+
+        $editProduct = product::findOrFail($request->updateid);
+        if ($request->file('updateProductImage')) {
+            $image = $request->file('updateProductImage');
             $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
             $image->move(base_path('\public\media'), $name_gen);
             $save_url = 'media/' . $name_gen;
@@ -69,29 +79,23 @@ class ProductController extends Controller
 
 
         $save_url = $editProduct->product_image;
-        $updateProduct = product::findOrFail($request->id)->update([
-            'product_name' => $request->txtProductName,
+        product::findOrFail($request->updateid)->update([
+            'product_name' => $request->txtUpdateProductName,
             'product_image' => $save_url,
-            'category_id' => $request->category,
+            'category_id' => $request->updateCategory,
             'updated_at' => Carbon::now()
         ]);
-        $notification = array(
-            'message' => 'Category Updated Successfully',
-            'alert-type' => 'success'
-        );
-        return redirect('/get/products')->with($notification);
+        
+        return response()->json(['success' => 'Product Updated successfully.']);
     }
 
-    public function deleteProduct($id)
+    public function deleteProduct(Request $request)
     {
-        $updateCategory = product::findOrFail($id)->update([
+        product::findOrFail($request->id)->update([
             'isDelete' => 1,
             'updated_at' => Carbon::now(),
         ]);
-        $notification = array(
-            'message' => 'Product Updated Successfully',
-            'alert-type' => 'success'
-        );
-        return redirect('/get/products')->with($notification);
+       
+        return response()->json(['success' => 'Category Deleted successfully.']);
     }
 }

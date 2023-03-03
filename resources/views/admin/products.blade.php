@@ -29,7 +29,7 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="listOfCategory">
+                    <tbody id="listOfProduct">
                         @php($i = 1)
                         @foreach($products as $product)
                         @if($product->isDelete == 0)
@@ -39,9 +39,9 @@
                             <td>{{ $product->product_name }}</td>
                             <td>{{ $product->category_name }}</td>
                             <td>
-                                <a href="{{ route('edit.product',$product->id) }}" id="updateCategory" style="float:left; margin-left: 25%; cursor: pointer" class="updateButton">
-                                    <i class="fa fa-edit fa-2x"></i></a>
-                                <a class="DeleteButton" style="float:right; margin-right: 25%" href="{{ route('delete.product',$product->id) }}" onclick="return confirm('Are You Sure?')">
+                                <span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="{{ $product->id }}">
+                                    <i class="fa fa-edit fa-2x"></i></span>
+                                <a class="DeleteButton" style="float:right; margin-right: 25%" data-id="{{ $product->id }}">
                                     <i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i>
                                 </a>
                             </td>
@@ -81,26 +81,69 @@
                     </div>
                     <div class="form-group">
                         <label for="fname">Upload Product Image</label>
-                        <input type="file" name="productImage" id="productImage" class="form-control" onchange="showPreview(event);" required>
+                        <input type="file" name="productImage" id="productImage" class="form-control" onchange="showPreview(event);">
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Product Name</label>
-                        <input type="text" class="form-control" id="txtProductName" placeholder="Enter Producut Name" name="txtProductName" required>
+                        <input type="text" class="form-control" id="txtProductName" placeholder="Enter Producut Name" name="txtProductName">
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Category</label>
-                        <select name="category" id="category" placeholder="Select Categoroy" required class="form-control"">
-                       
+                        <select name="category" id="category" placeholder="Select Categoroy" class="form-control">
+
                         </select>
                     </div>
                 </div>
                 <div class=" modal-footer border-top-0 d-flex justify-content-center">
-                            <button type="submit" class="btn btn-success" style="text-align: right;" id="addProduct">Add Product</button>
-                    </div>
+                    <button type="submit" class="btn btn-success" style="text-align: right;" id="addProduct">Add Product</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- update form -->
+<div class="modal fade" id="updateform" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="exampleModalLabel">Update Product</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close" id="addClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="updateProductForm" enctype="multipart/form-data">
+                <div class="alert alert-danger print-error-msg" style="display:none" id="productError">
+                    <ul></ul>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <img id="blah" src="#" style="width: 120px; height: 120px; text-align: center;display: none;" />
+                    </div>
+                    <div class="form-group">
+                        <label for="fname">Upload Product Image</label>
+                        <input type="file" name="updateProductImage" id="updateProductImage" class="form-control" onchange="showPreview(event);">
+                    </div>
+                    <div class="form-group">
+                        <input type="hidden" name="updateid" id="updateid">
+                        <label for="categoryName">Product Name</label>
+                        <input type="text" class="form-control" id="txtUpdateProductName" placeholder="Enter Producut Name" name="txtUpdateProductName">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryName">Category</label>
+                        <select name="updateCategory" id="updateCategory" placeholder="Select Categoroy" required class="form-control">
+
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-success" style="text-align: right;">Update Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
@@ -170,21 +213,124 @@
                     ).then(function() {
                         location.reload()
                     })
+                } else {
+                    printErrorMsg(data.error);
                 }
             }
         });
     });
 
+    function printErrorMsg(msg) {
+        $(".print-error-msg").find("ul").html('');
+        $(".print-error-msg").css('display', 'block');
+        $.each(msg, function(key, value) {
+            $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+        });
+
+    }
 
 
-    // function printErrorMsg(msg) {
-    //     $(".print-error-msg").find("ul").html('');
-    //     $(".print-error-msg").css('display', 'block');
-    //     $.each(msg, function(key, value) {
-    //         $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
-    //     });
+    //update Area
 
-    // }
+    var categories = ['<option value="0" disabled selected>Select Category</option>']
+    $.ajax({
+        url: "{{route('get.categories')}}",
+        type: "GET",
+        dataType: 'json',
+        success: function(data) {
+            for (var i = 0; i < data.length; i++) {
+                var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
+                categories.push(row)
+            }
+            $("#updateCategory").html(categories);
+        }
+    });
+
+    $(document).on('click', '.updateButton', function() {
+        updateId = $(this).data('id');
+        $.ajax({
+            type: 'POST',
+            url: "{{ route('edit.product') }}",
+            data: {
+                id: updateId
+            },
+            success: function(data) {
+                $('#updateid').val(data.id);
+                $('#txtUpdateProductName').val(data.product_name);
+                $('#updateCategory').val(data.category_id);
+            }
+        });
+    });
+
+    $('#updateProductForm').submit(function(e) {
+        e.preventDefault();
+
+        var updateFormData = new FormData(this);
+        $.ajax({
+            type: 'POST',
+            url: "{{ route('update.product') }}",
+            data: updateFormData,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+                if ($.isEmptyObject(data.error)) {
+                    Swal.fire(
+                        'Updated!',
+                        'Product has been Updated.',
+                        'success'
+                    ).then(function() {
+                        location.reload()
+                    })
+                } else {
+                    printUpdateErrorMsg(data.error);
+                }
+            }
+        });
+    });
+
+    function printUpdateErrorMsg(msg) {
+        $("#productError").find("ul").html('');
+        $("#productError").css('display', 'block');
+        $.each(msg, function(key, value) {
+            $("#productError").find("ul").append('<li>' + value + '</li>');
+        });
+    }
+
+    //delete product
+    $(".DeleteButton").click(function(e) {
+        e.preventDefault()
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't to Delete Product!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id = $(this).data('id');
+                $.ajax({
+                    type: 'POST',
+                    method: 'POST',
+                    url: "{{ route('delete.product') }}",
+                    data: {
+                        id: id,
+                    },
+                    success: function(data) {
+                        Swal.fire(
+                            'Deleted!',
+                            'Category has been deleted.',
+                            'success'
+                        ).then(function() {
+                            location.reload()
+                        })
+                    }
+                });
+            }
+        })
+
+    });
 </script>
 
 
