@@ -19,7 +19,7 @@
             <ul class="notification-area pull-right">
                 <li class="dropdown">
                     <i class="fa fa-user" data-toggle="dropdown"></i><i class="fa fa-caret-down" style="font-size:20px"></i>
-                    <a class="dropdown-menu" href="{{ route('admin.logout') }}" style="background-color: black; color: white; text-align: center;">log-Out</a>
+                    <a class="dropdown-menu" href="{{ route('admin.logout') }}" style="background-color: #444444; color: white; text-align: center;">log-Out</a>
                 </li>
             </ul>
         </div>

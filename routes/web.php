@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 //logout
 Route::controller(AdminController::class)->group(function(){
@@ -41,6 +41,7 @@ Route::controller(ProductController::class)->group(function(){
     Route::post('/edit/product','editProduct')->name('edit.product')->middleware(['auth', 'verified']);
     Route::post('/update/product','updateProduct')->name('update.product')->middleware(['auth', 'verified']);
     Route::post('/delete/product','deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
+    Route::get('/get/productByCategory/{id}','getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
 });
 
 // Route::get('/dashboard', function () {

@@ -13,11 +13,7 @@ class ProductController extends Controller
 {
     public function getProducts()
     {
-
-        $products = product::select('products.id', 'products.product_name', 'products.product_image','products.isDelete','Categories.category_name as category_name')
-        	->join('categories', 'categories.id', '=', 'products.category_id')
-        	->get();
-        return view('admin.products', compact('products'));
+        return view('admin.products');
     }
 
     public function addproduct(Request $request)
@@ -46,7 +42,7 @@ class ProductController extends Controller
             'category_id' => $request->category,
             'created_at' => Carbon::now()
         ]);
-        
+
         return response()->json(['success' => 'Product Added successfully.']);
     }
 
@@ -85,7 +81,7 @@ class ProductController extends Controller
             'category_id' => $request->updateCategory,
             'updated_at' => Carbon::now()
         ]);
-        
+
         return response()->json(['success' => 'Product Updated successfully.']);
     }
 
@@ -95,7 +91,20 @@ class ProductController extends Controller
             'isDelete' => 1,
             'updated_at' => Carbon::now(),
         ]);
-       
-        return response()->json(['success' => 'Category Deleted successfully.']);
+
+        return response()->json(['success' => 'Product Deleted successfully.']);
+    }
+
+    public function getProductsByCategory($id)
+    {
+        if ($id == 0) {
+            $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
+                ->join('categories', 'categories.id', '=', 'products.category_id')
+                ->get();
+                return response()->json($products);
+        }
+        $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
+            ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.category_id', '=', $id)->get();
+            return response()->json($products);
     }
 }

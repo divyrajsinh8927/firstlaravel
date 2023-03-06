@@ -1,7 +1,6 @@
 @extends('admin.adminMaster')
 @section('admin')
 
-
 <!-- page title area start -->
 <div class="page-title-area" style="margin-top: 20px;">
     <div class="row align-items-center">
@@ -12,6 +11,13 @@
             </button>
         </div>
     </div>
+</div>
+
+
+<div class="dropdown col-lg-6 col-md-4 col-sm-6">
+    <label for="Category" id="disp">Filter:</label>&nbsp&nbsp&nbsp
+    <select class="btn btn-rounded" id="filterCategory" name="filterCategory">
+    </select>
 </div>
 <!-- page title area end -->
 <div class="col-12 mt-5">
@@ -30,24 +36,7 @@
                         </tr>
                     </thead>
                     <tbody id="listOfProduct">
-                        @php($i = 1)
-                        @foreach($products as $product)
-                        @if($product->isDelete == 0)
-                        <tr>
-                            <td>{{$i++}}</td>
-                            <td><img src="{{ asset($product->product_image) }}" style="width: 130px; height: 130px;"> </td>
-                            <td>{{ $product->product_name }}</td>
-                            <td>{{ $product->category_name }}</td>
-                            <td>
-                                <span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="{{ $product->id }}">
-                                    <i class="fa fa-edit fa-2x"></i></span>
-                                <a class="DeleteButton" style="float:right; margin-right: 25%" data-id="{{ $product->id }}">
-                                    <i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        @endif
-                        @endforeach
+
                     </tbody>
                 </table>
             </div>
@@ -147,6 +136,59 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
+    $(document).ready(function() {
+        var categories = ['<option value="0">Category</option><option value="0">All Product</option>']
+        $.ajax({
+            url: "{{route('get.categories')}}",
+            type: "GET",
+            dataType: 'json',
+            success: function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
+                    categories.push(row)
+                }
+                $("#filterCategory").html(categories);
+            }
+        });
+
+        var products = []
+        $.ajax({
+            url: "{{ route('cat.product',0) }}",
+            type: "GET",
+            dataType: 'json',
+            success: function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    var url = '{{ asset("image") }}';
+                    url = url.replace('image', data[i].product_image);
+                    var row = $('<tr><td>' + data[i].id + '</td><td><img src=' + url + ' class="productImage" style="width: 130px; height: 130px;"></td><td>' + data[i].product_name + '</td><td>' + data[i].category_name + '</td><td><span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="' + data[i].id + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data[i].id + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span></td></tr>');
+                    products.push(row)
+                }
+                $("#listOfProduct").html(products);
+            }
+        });
+    });
+
+    document.getElementById('filterCategory').addEventListener('change', function() {
+        var productsByCategory = []
+        var selectCategory = document.getElementById('filterCategory').value;
+        var url = '{{ route("cat.product", ":id") }}';
+        url = url.replace(':id', selectCategory);
+        $.ajax({
+            url: url,
+            type: "GET",
+            dataType: 'json',
+            success: function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    var url = '{{ asset("image") }}';
+                    url = url.replace('image', data[i].product_image);
+                    var row = $('<tr><td>' + data[i].id + '</td><td><img src=' + url + ' class="productImage" style="width: 130px; height: 130px;"></td><td>' + data[i].product_name + '</td><td>' + data[i].category_name + '</td><td><span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="' + data[i].id + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data[i].id + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span></td></tr>');
+                    productsByCategory.push(row)
+                }
+                $("#listOfProduct").html(productsByCategory);
+            }
+        });
+    });
+
     function showPreview(event) {
         if (event.target.files.length > 0) {
             var src = URL.createObjectURL(event.target.files[0]);
@@ -232,7 +274,7 @@
 
     //update Area
 
-    var categories = ['<option value="0" disabled selected>Select Category</option>']
+    var updateCategories = ['<option value="0" disabled selected>Select Category</option>']
     $.ajax({
         url: "{{route('get.categories')}}",
         type: "GET",
@@ -240,9 +282,9 @@
         success: function(data) {
             for (var i = 0; i < data.length; i++) {
                 var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
-                categories.push(row)
+                updateCategories.push(row)
             }
-            $("#updateCategory").html(categories);
+            $("#updateCategory").html(updateCategories);
         }
     });
 
