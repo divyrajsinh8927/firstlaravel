@@ -37,7 +37,7 @@ Route::controller(CategoryController::class)->group(function(){
 });
 
 Route::controller(ProductController::class)->group(function(){
-    Route::get('/get/products','getProducts')->name('admin.products')->middleware(['auth', 'verified']);
+    Route::get('/products','getProducts')->name('admin.products')->middleware(['auth', 'verified']);
     Route::post('/add/product','addproduct')->name('add.product')->middleware(['auth', 'verified']);
     Route::post('/edit/product','editProduct')->name('edit.product')->middleware(['auth', 'verified']);
     Route::post('/update/product','updateProduct')->name('update.product')->middleware(['auth', 'verified']);

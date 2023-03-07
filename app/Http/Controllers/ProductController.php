@@ -146,7 +146,7 @@ class ProductController extends Controller
                 $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                     ->orWhere('products.id', 'LIKE', '%' . $search . '%')
                     ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
-            })->skip($start)->take($start,$length)->get();
+            })->skip($start)->take($length)->get();
         $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
             ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
                 global $search;
