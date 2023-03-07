@@ -1,5 +1,6 @@
 @extends('admin.adminMaster')
 @section('admin')
+
 <!-- page title area start -->
 <div class="main-content">
     <div class="page-title-area" style="margin-top: 20px;">
@@ -18,7 +19,7 @@
             <div class="card-body">
                 <h4 class="header-title">Categories Data</h4>
                 <div class="data-tables datatable-dark">
-                    <table id="dataTable2" class="text-center">
+                    <table id="dataTable2_ajax" class="text-center">
                         <thead class="text-capitalize">
                             <tr>
                                 <th>SL</th>
@@ -26,23 +27,8 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="listOfCategory">
-                            @php($i = 1)
-                            @foreach($categories as $category)
-                            @if($category->isDelete == 0)
-                            <tr>
-                                <td>{{$i++}}</td>
-                                <td>{{$category->category_name}}</td>
-                                <td>
-                                    <span data-toggle="modal" data-target="#updateCategoryForm" id="editCategory" style="float:left; margin-left: 25%; cursor: pointer" class="editCategory" data-id="{{$category->id}}">
-                                        <i class="fa fa-edit fa-2x"></i></span>
-                                    <span style="float:right; margin-right: 25%" data-id="{{$category->id}}" class="DeleteButton">
-                                        <i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i>
-                                    </span>
-                                </td>
-                            </tr>
-                            @endif
-                            @endforeach
+                        <tbody>
+
                         </tbody>
                     </table>
                 </div>
@@ -117,137 +103,170 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script type="text/javascript">
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-
-    $("#btn-submit").click(function(e) {
-        e.preventDefault();
-
-        var categoryName = $("#txtcategoryName").val();
-
-        $.ajax({
-            type: 'POST',
-            method: 'POST',
-            url: "{{ route('add.category') }}",
-            data: {
-                categoryName: categoryName
-            },
-            success: function(data) {
-                if ($.isEmptyObject(data.error)) {
-                    Swal.fire(
-                        'Inserted!',
-                        'Category has been Inserted.',
-                        'success'
-                    ).then(function() {
-                        location.reload()
-                    })
-                } else {
-                    printErrorMsg(data.error);
+    window.addEventListener('DOMContentLoaded', function(event) {
+        $(document).ready(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
-            }
-        });
-    });
-
-    function printErrorMsg(msg) {
-        $(".print-error-msg").find("ul").html('');
-        $(".print-error-msg").css('display', 'block');
-        $.each(msg, function(key, value) {
-            $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
-        });
-
-    }
+            });
 
 
-    //update Category
+            search_param = {};
+            table = $('#dataTable2_ajax').DataTable({
+                processing: true,
+                serverSide: true,
+                deferRender: true,
+                orderCellsTop: true,
+                ajax: function(data, callback) {
+                    $.each(search_param, function(k, v) {});
+                    $.ajax({
+                        url: "{{ route('get.All.categories') }}",
+                        data: data,
+                        type: "post",
+                        dataType: 'json',
+                        beforeSend: function() {},
+                        success: function(res) {
+                            callback(res);
+                        }
+                    });
+                },
+                'columns': [{
+                        'data': 'id',
+                    },
+                    {
+                        'data': 'category_name',
+                    },
+                    {
+                        'data': 'isDelete',
+                    },
+                ]
+            });
+            $("#btn-submit").click(function(e) {
+                e.preventDefault();
 
-    var updateId = 0;
-    $(document).on('click', '.editCategory', function() {
-        updateId = $(this).data('id');
-        $.ajax({
-            type: 'POST',
-            url: "{{ route('edit.category') }}",
-            data: {
-                id: updateId
-            },
-            success: function(data) {
-                $('#categoryId').val(data.id);
-                $('#txtUpdatecategoryName').val(data.category_name);
-            }
-        });
-    });
+                var categoryName = $("#txtcategoryName").val();
 
-
-    $("#btnUpdateCategory").click(function(e) {
-        e.preventDefault()
-
-        var id = $("#categoryId").val();
-        var updateCategoryName = $("#txtUpdatecategoryName").val();
-
-        $.ajax({
-            type: 'POST',
-            method: 'POST',
-            url: "{{ route('update.category') }}",
-            data: {
-                id: id,
-                updateCategory: updateCategoryName
-            },
-            success: function(data) {
-                if ($.isEmptyObject(data.error)) {
-                    alert(data.success);
-                    location.reload();
-                } else {
-                    printUpdateErrorMsg(data.error);
-                }
-            }
-        });
-    });
-
-    function printUpdateErrorMsg(msg) {
-        $("#updateErrorMessage").find("ul").html('');
-        $("#updateErrorMessage").css('display', 'block');
-        $.each(msg, function(key, value) {
-            $("#updateErrorMessage").find("ul").append('<li>' + value + '</li>');
-        });
-    }
-
-    //delete category
-    $(".DeleteButton").click(function(e) {
-        e.preventDefault()
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't to Delete Category!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                var id = $(this).data('id');
                 $.ajax({
                     type: 'POST',
                     method: 'POST',
-                    url: "{{ route('delete.category') }}",
+                    url: "{{ route('add.category') }}",
                     data: {
-                        id: id,
+                        categoryName: categoryName
                     },
                     success: function(data) {
-                        Swal.fire(
-                            'Deleted!',
-                            'Category has been deleted.',
-                            'success'
-                        ).then(function() {
-                            location.reload()
-                        })
+                        if ($.isEmptyObject(data.error)) {
+                            Swal.fire(
+                                'Inserted!',
+                                'Category has been Inserted.',
+                                'success'
+                            ).then(function() {
+                                location.reload()
+                            })
+                        } else {
+                            printErrorMsg(data.error);
+                        }
                     }
                 });
-            }
-        })
+            });
 
+            function printErrorMsg(msg) {
+                $(".print-error-msg").find("ul").html('');
+                $(".print-error-msg").css('display', 'block');
+                $.each(msg, function(key, value) {
+                    $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+                });
+
+            }
+
+
+            //update Category
+
+            var updateId = 0;
+            $(document).on('click', '.editCategory', function() {
+                updateId = $(this).data('id');
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('edit.category') }}",
+                    data: {
+                        id: updateId
+                    },
+                    success: function(data) {
+                        $('#categoryId').val(data.id);
+                        $('#txtUpdatecategoryName').val(data.category_name);
+                    }
+                });
+            });
+
+
+            $("#btnUpdateCategory").click(function(e) {
+                e.preventDefault()
+
+                var id = $("#categoryId").val();
+                var updateCategoryName = $("#txtUpdatecategoryName").val();
+
+                $.ajax({
+                    type: 'POST',
+                    method: 'POST',
+                    url: "{{ route('update.category') }}",
+                    data: {
+                        id: id,
+                        updateCategory: updateCategoryName
+                    },
+                    success: function(data) {
+                        if ($.isEmptyObject(data.error)) {
+                            alert(data.success);
+                            location.reload();
+                        } else {
+                            printUpdateErrorMsg(data.error);
+                        }
+                    }
+                });
+            });
+
+            function printUpdateErrorMsg(msg) {
+                $("#updateErrorMessage").find("ul").html('');
+                $("#updateErrorMessage").css('display', 'block');
+                $.each(msg, function(key, value) {
+                    $("#updateErrorMessage").find("ul").append('<li>' + value + '</li>');
+                });
+            }
+
+            //delete category
+            $(".DeleteButton").click(function(e) {
+                e.preventDefault()
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't to Delete Category!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var id = $(this).data('id');
+                        $.ajax({
+                            type: 'POST',
+                            method: 'POST',
+                            url: "{{ route('delete.category') }}",
+                            data: {
+                                id: id,
+                            },
+                            success: function(data) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Category has been deleted.',
+                                    'success'
+                                ).then(function() {
+                                    location.reload()
+                                })
+                            }
+                        });
+                    }
+                })
+            });
+        });
     });
 </script>
 

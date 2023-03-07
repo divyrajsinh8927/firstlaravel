@@ -11,6 +11,7 @@ use Intervention\Image\Facades\Image;
 
 class ProductController extends Controller
 {
+    public $search = "";
     public function getProducts()
     {
         return view('admin.products');
@@ -95,16 +96,72 @@ class ProductController extends Controller
         return response()->json(['success' => 'Product Deleted successfully.']);
     }
 
-    public function getProductsByCategory($id)
+    public function getProductsByCategory(Request $request)
     {
-        if ($id == 0) {
+        $category_id = $request->category_id;
+        $length = $request->length;
+        $start = $_POST['start'];
+        global $search;
+        $search = $request->search['value'];
+        $draw = $request->draw;
+        
+        $orderColumn = $request->order[0]['column'];
+        if ($orderColumn == 0)
+            $orderColumnName = "id";
+        elseif ($orderColumn == 2)
+            $orderColumnName = "products.product_name";
+        else
+            $orderColumnName = "Categories.category_name";
+        $order = $request->order[0]['dir'];
+        $totalProduct = product::where('isDelete', 0)->get()->count();
+        if ($category_id == 0) {
             $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
-                ->join('categories', 'categories.id', '=', 'products.category_id')
-                ->get();
-                return response()->json($products);
+                ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
+                    global $search;
+                    $query->where('products.product_name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('products.id', 'LIKE', '%' . $search . '%')
+                        ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+                })->skip($start)->take($length)
+                ->orderBy($orderColumnName, $order)->get();
+            $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
+                ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
+                    global $search;
+                    $query->where('products.product_name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('products.id', 'LIKE', '%' . $search . '%')
+                        ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+                })->get()->count();
+            $displayedProduct = $products->count();
+            $res = array(
+                "totalProduct" => $totalProduct,
+                "displayedProduct" => $displayedProduct,
+                "recordsFiltered" => $filterdproducts,
+                "draw" => intval($draw),
+                "data" => $products
+            );
+            return response()->json($res);
         }
         $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
-            ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.category_id', '=', $id)->get();
-            return response()->json($products);
+            ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
+                global $search;
+                $query->where('products.product_name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('products.id', 'LIKE', '%' . $search . '%')
+                    ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+            })->skip($start)->take($start,$length)->get();
+        $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
+            ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
+                global $search;
+                $query->where('products.product_name', 'LIKE', '%' . $search . '%')
+                    ->orWhere('products.id', 'LIKE', '%' . $search . '%')
+                    ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+            })->take($start,$length)->orderBy($orderColumnName, $order)->get()->count();
+        $displayedProduct = $products->count();
+        $res = array(
+            "totalProduct" => $totalProduct,
+            "displayedProduct" => $displayedProduct,
+            "recordsFiltered" => $filterdproducts,
+            "draw" => intval($draw),
+            "data" => $products
+        );
+        return response()->json($res);
     }
 }

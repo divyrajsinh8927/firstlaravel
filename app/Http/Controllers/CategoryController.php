@@ -11,8 +11,16 @@ class CategoryController extends Controller
 {
     public function getCategories()
     {
-        $categories = categories::get();
-        return view('admin.categories', compact('categories'));
+        return view('admin.categories');
+    }
+    
+    public function getAllCategories()
+    {
+        $categories = categories::where('isDelete',0)->get();
+        $responce = array(
+            "data" => $categories,
+        );
+        return response()->json($responce);
     }
 
     public function addCategory(Request $request)

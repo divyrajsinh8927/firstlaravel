@@ -13,7 +13,7 @@
     </div>
 </div>
 
-
+<p id="me"></p>
 <div class="dropdown col-lg-6 col-md-4 col-sm-6">
     <label for="Category" id="disp">Filter:</label>&nbsp&nbsp&nbsp
     <select class="btn btn-rounded" id="filterCategory" name="filterCategory">
@@ -23,9 +23,9 @@
 <div class="col-12 mt-5">
     <div class="card">
         <div class="card-body">
-            <h4 class="header-title">Categories Data</h4>
+            <h4 class="header-title">Product Data</h4>
             <div class="data-tables datatable-dark">
-                <table id="dataTable2" class="text-center">
+                <table id="dataTable2_ajax" class="text-center">
                     <thead class="text-capitalize">
                         <tr>
                             <th>SL</th>
@@ -136,242 +136,266 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
-    $(document).ready(function() {
-        var categories = ['<option value="0">Category</option><option value="0">All Product</option>']
-        $.ajax({
-            url: "{{route('get.categories')}}",
-            type: "GET",
-            dataType: 'json',
-            success: function(data) {
-                for (var i = 0; i < data.length; i++) {
-                    var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
-                    categories.push(row)
-                }
-                $("#filterCategory").html(categories);
+    window.addEventListener('DOMContentLoaded', function(event) {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-        var products = []
-        $.ajax({
-            url: "{{ route('cat.product',0) }}",
-            type: "GET",
-            dataType: 'json',
-            success: function(data) {
-                for (var i = 0; i < data.length; i++) {
-                    var url = '{{ asset("image") }}';
-                    url = url.replace('image', data[i].product_image);
-                    var row = $('<tr><td>' + data[i].id + '</td><td><img src=' + url + ' class="productImage" style="width: 130px; height: 130px;"></td><td>' + data[i].product_name + '</td><td>' + data[i].category_name + '</td><td><span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="' + data[i].id + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data[i].id + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span></td></tr>');
-                    products.push(row)
+
+        $(document).ready(function() {
+            var filtercategories = ['<option value="0">Category</option><option value="0">All Product</option>']
+            $.ajax({
+                url: "{{route('get.categories')}}",
+                type: "GET",
+                dataType: 'json',
+                success: function(data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
+                        filtercategories.push(row)
+                    }
+                    $("#filterCategory").html(filtercategories);
                 }
-                $("#listOfProduct").html(products);
-            }
-        });
-    });
+            });
 
-    document.getElementById('filterCategory').addEventListener('change', function() {
-        var productsByCategory = []
-        var selectCategory = document.getElementById('filterCategory').value;
-        var url = '{{ route("cat.product", ":id") }}';
-        url = url.replace(':id', selectCategory);
-        $.ajax({
-            url: url,
-            type: "GET",
-            dataType: 'json',
-            success: function(data) {
-                for (var i = 0; i < data.length; i++) {
-                    var url = '{{ asset("image") }}';
-                    url = url.replace('image', data[i].product_image);
-                    var row = $('<tr><td>' + data[i].id + '</td><td><img src=' + url + ' class="productImage" style="width: 130px; height: 130px;"></td><td>' + data[i].product_name + '</td><td>' + data[i].category_name + '</td><td><span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="' + data[i].id + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data[i].id + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span></td></tr>');
-                    productsByCategory.push(row)
-                }
-                $("#listOfProduct").html(productsByCategory);
-            }
-        });
-    });
+            $('#filterCategory').on("change", function(e) {
+                table.ajax.reload();
+            });
 
-    function showPreview(event) {
-        if (event.target.files.length > 0) {
-            var src = URL.createObjectURL(event.target.files[0]);
-            var preview = document.getElementById("blah");
-            preview.src = src;
-            preview.style.display = "block";
-        }
-    }
+            search_param = {};
+            table = $('#dataTable2_ajax').DataTable({
+                processing: true,
+                serverSide: true,
+                deferRender: true,
+                orderCellsTop: true,
+                ajax: function(data, callback) {
+                    $.each(search_param, function(k, v) {});
+                    data.category_id = $('#filterCategory').val();
+                    $.ajax({
+                        url: "{{ route('cat.product') }}",
+                        data: data,
+                        type: "post",
+                        dataType: 'json',
+                        beforeSend: function() {},
+                        success: function(res) {
+                            callback(res);
+                            $('#dataTable2_ajax_info').html("<b style='font-size: 15px;'>Found </b>&nbsp&nbsp<b style='font-size: 20px;'>" + res.displayedProduct + "</b> &nbsp&nbsp<b style='font-size: 15px;'> From Total </b>&nbsp&nbsp<b style='font-size: 20px;'>" + res.totalProduct + "</b><b style='font-size: 15px;'>  &nbsp&nbspProducts </b>");
+                        }
+                    });
+                },
+                language: {
+                    processing: '<i class="fa fa-spinner fa-spin fa-1x fa-fw"></i> <span class="sr-only" style="display:contents;"> Loading...</span>'
+                },
+                lengthMenu: [
+                    [5, 10, 25, 50, 100, 150, 250, 500, 1000, 1500, -1],
+                    [5, 10, 25, 50, 100, 150, 250, 500, 1000, 1500, 'All']
+                ],
+                'columns': [{
+                        'data': 'id',
+                    },
+                    {
+                        'data': 'product_image','orderable':false,
+                        render: function(data, type, row, meta) {
+                            var imgurl = "{{ asset(':data') }}";
+                            imgurl = imgurl.replace(':data', data);
+                            return '<img src="' + imgurl + '">';
+                        }
+                    },
+                    {
+                        'data': 'product_name',
+                    },
+                    {
+                        'data': 'category_name',
+                    },
+                    {
+                        'data': 'id','orderable':false,
+                        render: function(data, type, row, meta) {
+                            return '<span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="' + data + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span>';
+                        }
+                    }
+                ]
+                
+            });
 
 
-    const fileInput = document.getElementById('productImage');
-
-    fileInput.addEventListener('change', function() {
-        const file = fileInput.files[0];
-        if (file.type != 'image/jpeg' && file.type != 'image/jpg' && file.type != 'image/png') {
-            $("#productForm")[0].reset();
-            alert('Please select a JPEG image file.');
-            return;
-        }
-
-        if (file.size > 10 * 1024 * 1024) {
-            alert('The file size exceeds the maximum limit of 10MB.');
-            return;
-        }
-    });
-
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-
-    var categories = ['<option value="0" disabled selected>Select Category</option>']
-    $.ajax({
-        url: "{{route('get.categories')}}",
-        type: "GET",
-        dataType: 'json',
-        success: function(data) {
-            for (var i = 0; i < data.length; i++) {
-                var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
-                categories.push(row)
-            }
-            $("#category").html(categories);
-        }
-    });
-
-    $('#productForm').submit(function(e) {
-        e.preventDefault();
-
-        var formData = new FormData(this);
-        $.ajax({
-            type: 'POST',
-            url: "{{ route('add.product') }}",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-                if ($.isEmptyObject(data.error)) {
-                    Swal.fire(
-                        'Inserted!',
-                        'Product has been Inserted.',
-                        'success'
-                    ).then(function() {
-                        location.reload()
-                    })
-                } else {
-                    printErrorMsg(data.error);
+            function showPreview(event) {
+                if (event.target.files.length > 0) {
+                    var src = URL.createObjectURL(event.target.files[0]);
+                    var preview = document.getElementById("blah");
+                    preview.src = src;
+                    preview.style.display = "block";
                 }
             }
-        });
-    });
-
-    function printErrorMsg(msg) {
-        $(".print-error-msg").find("ul").html('');
-        $(".print-error-msg").css('display', 'block');
-        $.each(msg, function(key, value) {
-            $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
-        });
-
-    }
 
 
-    //update Area
+            const fileInput = document.getElementById('productImage');
 
-    var updateCategories = ['<option value="0" disabled selected>Select Category</option>']
-    $.ajax({
-        url: "{{route('get.categories')}}",
-        type: "GET",
-        dataType: 'json',
-        success: function(data) {
-            for (var i = 0; i < data.length; i++) {
-                var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
-                updateCategories.push(row)
-            }
-            $("#updateCategory").html(updateCategories);
-        }
-    });
-
-    $(document).on('click', '.updateButton', function() {
-        updateId = $(this).data('id');
-        $.ajax({
-            type: 'POST',
-            url: "{{ route('edit.product') }}",
-            data: {
-                id: updateId
-            },
-            success: function(data) {
-                $('#updateid').val(data.id);
-                $('#txtUpdateProductName').val(data.product_name);
-                $('#updateCategory').val(data.category_id);
-            }
-        });
-    });
-
-    $('#updateProductForm').submit(function(e) {
-        e.preventDefault();
-
-        var updateFormData = new FormData(this);
-        $.ajax({
-            type: 'POST',
-            url: "{{ route('update.product') }}",
-            data: updateFormData,
-            contentType: false,
-            processData: false,
-            success: function(data) {
-                if ($.isEmptyObject(data.error)) {
-                    Swal.fire(
-                        'Updated!',
-                        'Product has been Updated.',
-                        'success'
-                    ).then(function() {
-                        location.reload()
-                    })
-                } else {
-                    printUpdateErrorMsg(data.error);
+            fileInput.addEventListener('change', function() {
+                const file = fileInput.files[0];
+                if (file.type != 'image/jpeg' && file.type != 'image/jpg' && file.type != 'image/png') {
+                    $("#productForm")[0].reset();
+                    alert('Please select a JPEG image file.');
+                    return;
                 }
-            }
-        });
-    });
 
-    function printUpdateErrorMsg(msg) {
-        $("#productError").find("ul").html('');
-        $("#productError").css('display', 'block');
-        $.each(msg, function(key, value) {
-            $("#productError").find("ul").append('<li>' + value + '</li>');
-        });
-    }
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('The file size exceeds the maximum limit of 10MB.');
+                    return;
+                }
+            });
 
-    //delete product
-    $(".DeleteButton").click(function(e) {
-        e.preventDefault()
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't to Delete Product!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                var id = $(this).data('id');
+
+            var categories = ['<option value="0" disabled selected>Select Category</option>']
+            $.ajax({
+                url: "{{route('get.categories')}}",
+                type: "GET",
+                dataType: 'json',
+                success: function(data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
+                        categories.push(row)
+                    }
+                    $("#category").html(categories);
+                }
+            });
+
+            $('#productForm').submit(function(e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
                 $.ajax({
                     type: 'POST',
-                    method: 'POST',
-                    url: "{{ route('delete.product') }}",
-                    data: {
-                        id: id,
-                    },
+                    url: "{{ route('add.product') }}",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
                     success: function(data) {
-                        Swal.fire(
-                            'Deleted!',
-                            'Category has been deleted.',
-                            'success'
-                        ).then(function() {
-                            location.reload()
-                        })
+                        if ($.isEmptyObject(data.error)) {
+                            Swal.fire(
+                                'Inserted!',
+                                'Product has been Inserted.',
+                                'success'
+                            ).then(function() {
+                                location.reload()
+                            })
+                        } else {
+                            printErrorMsg(data.error);
+                        }
                     }
                 });
-            }
-        })
+            });
 
+            function printErrorMsg(msg) {
+                $(".print-error-msg").find("ul").html('');
+                $(".print-error-msg").css('display', 'block');
+                $.each(msg, function(key, value) {
+                    $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+                });
+
+            }
+
+
+            //update Area
+            var updateCategories = ['<option value="0" disabled selected>Select Category</option>']
+            $.ajax({
+                url: "{{route('get.categories')}}",
+                type: "GET",
+                dataType: 'json',
+                success: function(data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var row = $('<option value=' + data[i].id + '>' + data[i].category_name + '</option>');
+                        updateCategories.push(row)
+                    }
+                    $("#updateCategory").html(updateCategories);
+                }
+            });
+
+            $(document).on('click', '.updateButton', function() {
+                updateId = $(this).data('id');
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('edit.product') }}",
+                    data: {
+                        id: updateId
+                    },
+                    success: function(data) {
+                        $('#updateid').val(data.id);
+                        $('#txtUpdateProductName').val(data.product_name);
+                        $('#updateCategory').val(data.category_id);
+                    }
+                });
+            });
+
+            $('#updateProductForm').submit(function(e) {
+                e.preventDefault();
+
+                var updateFormData = new FormData(this);
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('update.product') }}",
+                    data: updateFormData,
+                    contentType: false,
+                    processData: false,
+                    success: function(data) {
+                        if ($.isEmptyObject(data.error)) {
+                            Swal.fire(
+                                'Updated!',
+                                'Product has been Updated.',
+                                'success'
+                            ).then(function() {
+                                location.reload()
+                            })
+                        } else {
+                            printUpdateErrorMsg(data.error);
+                        }
+                    }
+                });
+            });
+
+            function printUpdateErrorMsg(msg) {
+                $("#productError").find("ul").html('');
+                $("#productError").css('display', 'block');
+                $.each(msg, function(key, value) {
+                    $("#productError").find("ul").append('<li>' + value + '</li>');
+                });
+            }
+
+            //delete product
+            $(document).on('click', '.DeleteButton', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't to Delete Product!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var id = $(this).data('id');
+                        $.ajax({
+                            type: 'POST',
+                            method: 'POST',
+                            url: "{{ route('delete.product') }}",
+                            data: {
+                                id: id,
+                            },
+                            success: function(data) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Category has been deleted.',
+                                    'success'
+                                ).then(function() {
+                                    location.reload()
+                                })
+                            }
+                        });
+                    }
+                })
+
+            });
+        });
     });
 </script>
 

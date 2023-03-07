@@ -33,6 +33,7 @@ Route::controller(CategoryController::class)->group(function(){
     Route::post('/update/category','updateCategory')->name('update.category')->middleware(['auth', 'verified']);
     Route::post('/delete/category','deleteCategory')->name('delete.category')->middleware(['auth', 'verified']);
     Route::get('/categories','getCategoriesForOption')->name('get.categories')->middleware(['auth', 'verified']);
+    Route::post('/get/categories','getAllCategories')->name('get.All.categories')->middleware(['auth', 'verified']);
 });
 
 Route::controller(ProductController::class)->group(function(){
@@ -41,7 +42,7 @@ Route::controller(ProductController::class)->group(function(){
     Route::post('/edit/product','editProduct')->name('edit.product')->middleware(['auth', 'verified']);
     Route::post('/update/product','updateProduct')->name('update.product')->middleware(['auth', 'verified']);
     Route::post('/delete/product','deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
-    Route::get('/get/productByCategory/{id}','getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
+    Route::post('/get/productByCategory','getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
 });
 
 // Route::get('/dashboard', function () {
