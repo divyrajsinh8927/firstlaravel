@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\categoriesImport;
 use Illuminate\Support\Facades\Validator;
 use App\Models\categories;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\LazyCollection;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class CategoryController extends Controller
 {
@@ -13,11 +18,41 @@ class CategoryController extends Controller
     {
         return view('admin.categories');
     }
-    
-    public function getAllCategories()
+
+    public function getAllCategories(Request $request)
     {
-        $categories = categories::where('isDelete',0)->get();
+        $category_id = $request->category_id;
+        $length = $request->length;
+        $start = $_POST['start'];
+        global $search;
+        $search = $request->search['value'];
+        $draw = $request->draw;
+        $order = $request->order[0]['dir'];
+
+        $orderColumn = $request->order[0]['column'];
+        if ($orderColumn == 0)
+            $orderColumnName = "id";
+        elseif ($orderColumn == 2)
+            $orderColumnName = "category_name";
+
+        $totalCategory = categories::where('isDelete', 0)->get()->count();
+        $categories = categories::where('isDelete', 0)->where(function ($query) {
+            global $search;
+            $query->where('id', 'LIKE', '%' . $search . '%')
+                ->orWhere('category_name', 'LIKE', '%' . $search . '%');
+        })->skip($start)->take($length)
+            ->orderBy($orderColumnName, $order)->get();
+        $displayedCategories = $categories->count();
+        $filterdCategories = categories::where('isDelete', 0)->where(function ($query) {
+            global $search;
+            $query->where('id', 'LIKE', '%' . $search . '%')
+                ->orWhere('category_name', 'LIKE', '%' . $search . '%');
+        })->orderBy($orderColumnName, $order)->get()->count();
         $responce = array(
+            "totalProduct" => $totalCategory,
+            "displayedProduct" => $displayedCategories,
+            "recordsFiltered" => $filterdCategories,
+            "draw" => intval($draw),
             "data" => $categories,
         );
         return response()->json($responce);
@@ -51,7 +86,7 @@ class CategoryController extends Controller
 
     public function updateCategory(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'updateCategory' => 'required',
         ]);
 
@@ -60,7 +95,7 @@ class CategoryController extends Controller
                 'error' => $validator->errors()->all()
             ]);
         }
-        
+
         categories::findOrFail($request->id)->update([
             'category_name' => $request->updateCategory,
             'updated_at' => Carbon::now(),
@@ -79,7 +114,16 @@ class CategoryController extends Controller
 
     public function getCategoriesForOption()
     {
-        $categories = categories::where('isDelete',0)->get();
+        $categories = categories::where('isDelete', 0)->get();
         return response()->json($categories);
+    }
+
+
+
+    public function importCsv(Request $request)
+    {
+        $reader = fopen($request->categoryfile, "r");
+        // $error = Excel::import(new categoriesImport, $request->categoryfile);
+       
     }
 }

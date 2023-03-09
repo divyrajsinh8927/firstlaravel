@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
+use App\Exports\ProductExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -163,5 +165,10 @@ class ProductController extends Controller
             "data" => $products
         );
         return response()->json($res);
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductExport,'products.csv');
     }
 }

@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('auth.login');
-});
+})->middleware('guest');
 //logout
 Route::controller(AdminController::class)->group(function(){
     Route::get('admin/logout','destroy')->name('admin.logout');
@@ -34,6 +34,7 @@ Route::controller(CategoryController::class)->group(function(){
     Route::post('/delete/category','deleteCategory')->name('delete.category')->middleware(['auth', 'verified']);
     Route::get('/categories','getCategoriesForOption')->name('get.categories')->middleware(['auth', 'verified']);
     Route::post('/get/categories','getAllCategories')->name('get.All.categories')->middleware(['auth', 'verified']);
+    Route::post('/import/categories','importCsv')->name('import.categories')->middleware(['auth', 'verified']);
 });
 
 Route::controller(ProductController::class)->group(function(){
@@ -43,6 +44,7 @@ Route::controller(ProductController::class)->group(function(){
     Route::post('/update/product','updateProduct')->name('update.product')->middleware(['auth', 'verified']);
     Route::post('/delete/product','deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
     Route::post('/get/productByCategory','getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
+    Route::get('/product-export', 'export')->name('products.export')->middleware(['auth', 'verified']);
 });
 
 // Route::get('/dashboard', function () {

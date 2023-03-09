@@ -19,6 +19,7 @@
     <select class="btn btn-rounded" id="filterCategory" name="filterCategory">
     </select>
 </div>
+<a href="{{ route('products.export') }}" class="btn btn-primary mb-3" role="button" id="exportProducts" style="float: right; margin-right: 30px;">Export</a>
 <!-- page title area end -->
 <div class="col-12 mt-5">
     <div class="card">
@@ -66,7 +67,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <img id="blah" src="#" style="width: 120px; height: 120px; text-align: center;display: none;" />
+                        <img id="blah" src="" style="width: 120px; height: 120px; text-align: center;" />
                     </div>
                     <div class="form-group">
                         <label for="fname">Upload Product Image</label>
@@ -107,11 +108,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <img id="blah" src="#" style="width: 120px; height: 120px; text-align: center;display: none;" />
+                        <img id="upblah" src="#" style="width: 120px; height: 120px; text-align: center;" />
                     </div>
                     <div class="form-group">
                         <label for="fname">Upload Product Image</label>
-                        <input type="file" name="updateProductImage" id="updateProductImage" class="form-control" onchange="showPreview(event);">
+                        <input type="file" name="updateProductImage" id="updateProductImage" class="form-control">
                     </div>
                     <div class="form-group">
                         <input type="hidden" name="updateid" id="updateid">
@@ -145,6 +146,27 @@
 
 
         $(document).ready(function() {
+
+            $("#productImage").change(function() {
+                const file = this.files[0];
+                if (file) {
+                    var src = URL.createObjectURL(file);
+                    var preview = document.getElementById("blah");
+                    preview.src = src;
+                }
+            });
+
+
+            $("#updateProductImage").change(function() {
+                const file = this.files[0];
+                if (file) {
+                    var src = URL.createObjectURL(file);
+                    var preview = document.getElementById("upblah");
+                    preview.src = src;
+                }
+            });
+
+
             var filtercategories = ['<option value="0">Category</option><option value="0">All Product</option>']
             $.ajax({
                 url: "{{route('get.categories')}}",
@@ -195,7 +217,8 @@
                         'data': 'id',
                     },
                     {
-                        'data': 'product_image','orderable':false,
+                        'data': 'product_image',
+                        'orderable': false,
                         render: function(data, type, row, meta) {
                             var imgurl = "{{ asset(':data') }}";
                             imgurl = imgurl.replace(':data', data);
@@ -209,24 +232,18 @@
                         'data': 'category_name',
                     },
                     {
-                        'data': 'id','orderable':false,
+                        'data': 'id',
+                        'orderable': false,
                         render: function(data, type, row, meta) {
                             return '<span style="float:left; margin-left: 25%; cursor: pointer" class="updateButton" data-toggle="modal" data-target="#updateform" data-id="' + data + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span>';
                         }
                     }
                 ]
-                
+
             });
 
 
-            function showPreview(event) {
-                if (event.target.files.length > 0) {
-                    var src = URL.createObjectURL(event.target.files[0]);
-                    var preview = document.getElementById("blah");
-                    preview.src = src;
-                    preview.style.display = "block";
-                }
-            }
+
 
 
             const fileInput = document.getElementById('productImage');
@@ -393,8 +410,10 @@
                         });
                     }
                 })
-
             });
+
+
+
         });
     });
 </script>

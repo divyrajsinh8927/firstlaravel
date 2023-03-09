@@ -17,6 +17,9 @@
     <div class="col-12 mt-5">
         <div class="card">
             <div class="card-body">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#importCategory" style="text-decoration: none; color: white;border: 0px solid; float: right; background-color: #0069D9; margin-top: -17px;">
+                    Import
+                </button>
                 <h4 class="header-title">Categories Data</h4>
                 <div class="data-tables datatable-dark">
                     <table id="dataTable2_ajax" class="text-center">
@@ -41,6 +44,37 @@
 </div>
 <!-- main content area end -->
 </div>
+
+
+<!--Import model-->
+<div class="modal fade" id="importCategory" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="exampleModalLabel">Import Category</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="import">
+                <div class="alert alert-danger print-error-msg" style="display:none">
+                    <ul></ul>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="categoryName">Category File</label>
+                        <input type="file" class="form-control" id="categoryfile" name="categoryfile">
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 d-flex justify-content-center">
+                    <button class="btn btn-success" style="text-align: right;">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <!--add Category Model-->
 <div class="modal fade" id="addCategoryForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -138,10 +172,55 @@
                         'data': 'category_name',
                     },
                     {
-                        'data': 'isDelete',
+                        'data': 'id',
+                        'orderable': false,
+                        render: function(data, type, row, meta) {
+                            return '<span style="float:left; margin-left: 25%; cursor: pointer" class="editCategory" data-toggle="modal" data-target="#updateCategoryForm" data-id="' + data + '"><i class="fa fa-edit fa-2x"></i></span><span class="DeleteButton" style="float:right; margin-right: 25%" data-id="' + data + '"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span>';
+                        }
                     },
                 ]
             });
+
+
+            //import
+            const fileInput = document.getElementById('categoryfile');
+
+            fileInput.addEventListener('change', function() {
+                const file = fileInput.files[0];
+                var path = fileInput.value
+                var allowedExtensions =
+                    /(\.csv|\.xlsx)$/i;
+                if (!allowedExtensions.exec(path)) {
+                    Swal.fire(
+                        'Not Supported!',
+                        'Please Upload csv Or xlsx Filr.',
+                        'error'
+                    )
+                    fileInput.value = '';
+                    return false;
+                }
+            });
+            $('#import').submit(function(e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('import.categories') }}",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(data) {
+                        if (data == "Done") {
+                            alert(data)
+                        } else {
+                            alert(data)
+                        }
+                    }
+                });
+            });
+
+            //add
             $("#btn-submit").click(function(e) {
                 e.preventDefault();
 
@@ -233,8 +312,7 @@
             }
 
             //delete category
-            $(".DeleteButton").click(function(e) {
-                e.preventDefault()
+            $(document).on('click', '.DeleteButton', function() {
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "You won't to Delete Category!",
