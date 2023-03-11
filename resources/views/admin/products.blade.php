@@ -15,11 +15,13 @@
 
 <p id="me"></p>
 <div class="dropdown col-lg-6 col-md-4 col-sm-6">
+    <form id="form-filter" method="post">
     <label for="Category" id="disp">Filter:</label>&nbsp&nbsp&nbsp
     <select class="btn btn-rounded" id="filterCategory" name="filterCategory">
     </select>
+    </form>
 </div>
-<a href="{{ route('products.export') }}" class="btn btn-primary mb-3" role="button" id="exportProducts" style="float: right; margin-right: 30px;">Export</a>
+<button class="btn btn-primary mb-3" type="button" id="exportProducts" style="float: right; margin-right: 30px;" id="exportProducts">Export</button>
 <!-- page title area end -->
 <div class="col-12 mt-5">
     <div class="card">
@@ -29,7 +31,8 @@
                 <table id="dataTable2_ajax" class="text-center">
                     <thead class="text-capitalize">
                         <tr>
-                            <th>SL</th>
+                            <th class="text-center">Select All&nbsp;&nbsp;&nbsp;<input class="mycheckbox" type="checkbox" style="height: 15px; width: 15px;" id="checkAll"></th>
+                            <th>id</th>
                             <th>Product Image</th>
                             <th>Product Name</th>
                             <th>Category Name</th>
@@ -215,6 +218,13 @@
                 ],
                 'columns': [{
                         'data': 'id',
+                        'orderable': false,
+                        render: function(data, type, row, meta) {
+                            return '<input class="form-check-input" type="checkbox" value="' + data + '" style="height: 30px; width: 30px; margin-top: -13px;">';
+                        }
+                    },
+                    {
+                        'data': 'id',
                     },
                     {
                         'data': 'product_image',
@@ -222,7 +232,7 @@
                         render: function(data, type, row, meta) {
                             var imgurl = "{{ asset(':data') }}";
                             imgurl = imgurl.replace(':data', data);
-                            return '<img src="' + imgurl + '">';
+                            return '<img src="' + imgurl + '" style="height: 100px; width: 100px;">';
                         }
                     },
                     {
@@ -242,7 +252,20 @@
 
             });
 
+            $("#checkAll").click(function() {
+                $('.form-check-input').not(this).prop('checked', this.checked);
+            });
 
+
+            $(document).on("click", "#exportProducts", function() {
+                var checked = [];
+                $(".form-check-input:checked").each(function() {
+                    checked.push($(this).val());
+                });
+                var ids = checked.join(",");
+                var url = '/product-export' + '?ids='+ids+'&' + $('#form-filter').serialize();                // var finalurl = url.replace("ids",ids);
+                window.open(url, '_blank');
+            });
 
 
 

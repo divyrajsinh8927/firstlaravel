@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\categories;
 use App\Models\product;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
@@ -106,7 +107,7 @@ class ProductController extends Controller
         global $search;
         $search = $request->search['value'];
         $draw = $request->draw;
-        
+
         $orderColumn = $request->order[0]['column'];
         if ($orderColumn == 0)
             $orderColumnName = "id";
@@ -155,7 +156,7 @@ class ProductController extends Controller
                 $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                     ->orWhere('products.id', 'LIKE', '%' . $search . '%')
                     ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
-            })->take($start,$length)->orderBy($orderColumnName, $order)->get()->count();
+            })->take($start, $length)->orderBy($orderColumnName, $order)->get()->count();
         $displayedProduct = $products->count();
         $res = array(
             "totalProduct" => $totalProduct,
@@ -167,8 +168,52 @@ class ProductController extends Controller
         return response()->json($res);
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new ProductExport,'products.csv');
+        $ids = $request->ids;
+        $filter = $request->filterCategory;
+
+        $where_sql = '';
+        $where = [];
+
+        $where[] = " WHERE products.isDelete='0' ";
+        if (!empty($ids)) {
+            $where[] = "products.id IN($ids)";
+        }
+
+        if (!empty($filter)) {
+            $where[] = " products.category_id = '$filter' ";
+        }
+
+        $where_sql = implode(' AND ', $where);
+
+        $query = "SELECT products.id, products.product_name, products.isDelete, categories.category_name FROM products LEFT JOIN categories ON products.category_id = categories.id $where_sql";
+        $products = DB::select($query);
+
+        $headers = array("id", "product_name", "category_name");
+        $filename = 'products' . date('d_m_Y_H_i_s');
+        header("Content-type: application/csv");
+        header("Content-Disposition: attachment; filename=\"$filename" . ".csv\"");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+
+        $handle = fopen('php://output', 'w');
+        fputcsv($handle, $headers);
+
+        if (count($products) > 0) {
+            foreach ($products as $row) {
+
+                $pdata = [];
+
+                $pdata[] = $row->id;
+				$pdata[] = $row->product_name;
+				$pdata[] = $row->category_name;
+
+                fputcsv($handle, $pdata);
+            }
+        }
+
+        fclose($handle);
+        exit;
     }
 }
