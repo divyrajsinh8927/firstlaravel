@@ -17,9 +17,9 @@
     <div class="col-12 mt-5">
         <div class="card">
             <div class="card-body">
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#importCategory" style="text-decoration: none; color: white;border: 0px solid; float: right; background-color: #0069D9; margin-top: -17px;">
+                <a class="btn btn-danger" href="{{ url('importCategory') }}" style="text-decoration: none; color: white;border: 0px solid; float: right; background-color: #0069D9; margin-top: -17px;">
                     Import
-                </button>
+                </a>
                 <h4 class="header-title">Categories Data</h4>
                 <div class="data-tables datatable-dark">
                     <table id="dataTable2_ajax" class="text-center">
@@ -47,33 +47,7 @@
 
 
 <!--Import model-->
-<div class="modal fade" id="importCategory" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title" id="exampleModalLabel">Import Category</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
 
-            <form id="import">
-                <div class="alert alert-danger print-error-msg" style="display:none">
-                    <ul></ul>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="categoryName">Category File</label>
-                        <input type="file" class="form-control" id="categoryfile" name="categoryfile">
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0 d-flex justify-content-center">
-                    <button class="btn btn-success" style="text-align: right;">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 
 <!--add Category Model-->
@@ -211,11 +185,11 @@
                     contentType: false,
                     processData: false,
                     success: function(data) {
-                        if (data == "Done") {
-                            alert(data)
-                        } else {
-                            alert(data)
-                        }
+                        Swal.fire(
+                            'Imported!',
+                            'Category has been Imported.',
+                            'success'
+                        )
                     }
                 });
             });

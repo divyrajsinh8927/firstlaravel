@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminController ;
-use App\Http\Controllers\CategoryController ;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,30 +20,33 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('auth.login');
 })->middleware('guest');
+Route::get('/importCategory', function () {
+    return view('admin.importCategory');
+})->middleware(['auth', 'verified']);
 //logout
-Route::controller(AdminController::class)->group(function(){
-    Route::get('admin/logout','destroy')->name('admin.logout');
+Route::controller(AdminController::class)->group(function () {
+    Route::get('admin/logout', 'destroy')->name('admin.logout');
 });
 
 //category Routes
-Route::controller(CategoryController::class)->group(function(){
-    Route::get('/dashboard','getCategories')->name('admin.categories')->middleware(['auth', 'verified']);
-    Route::post('/add/category','addCategory')->name('add.category')->middleware(['auth', 'verified']);
-    Route::post('/edit/category','editCategory')->name('edit.category')->middleware(['auth', 'verified']);
-    Route::post('/update/category','updateCategory')->name('update.category')->middleware(['auth', 'verified']);
-    Route::post('/delete/category','deleteCategory')->name('delete.category')->middleware(['auth', 'verified']);
-    Route::get('/categories','getCategoriesForOption')->name('get.categories')->middleware(['auth', 'verified']);
-    Route::post('/get/categories','getAllCategories')->name('get.All.categories')->middleware(['auth', 'verified']);
-    Route::post('/import/categories','importCsv')->name('import.categories')->middleware(['auth', 'verified']);
+Route::controller(CategoryController::class)->group(function () {
+    Route::get('/dashboard', 'getCategories')->name('admin.categories')->middleware(['auth', 'verified']);
+    Route::post('/add/category', 'addCategory')->name('add.category')->middleware(['auth', 'verified']);
+    Route::post('/edit/category', 'editCategory')->name('edit.category')->middleware(['auth', 'verified']);
+    Route::post('/update/category', 'updateCategory')->name('update.category')->middleware(['auth', 'verified']);
+    Route::post('/delete/category', 'deleteCategory')->name('delete.category')->middleware(['auth', 'verified']);
+    Route::get('/categories', 'getCategoriesForOption')->name('get.categories')->middleware(['auth', 'verified']);
+    Route::post('/get/categories', 'getAllCategories')->name('get.All.categories')->middleware(['auth', 'verified']);
+    Route::post('/import/categories', 'importCsv')->name('import.categories')->middleware(['auth', 'verified']);
 });
 
-Route::controller(ProductController::class)->group(function(){
-    Route::get('/products','getProducts')->name('admin.products')->middleware(['auth', 'verified']);
-    Route::post('/add/product','addproduct')->name('add.product')->middleware(['auth', 'verified']);
-    Route::post('/edit/product','editProduct')->name('edit.product')->middleware(['auth', 'verified']);
-    Route::post('/update/product','updateProduct')->name('update.product')->middleware(['auth', 'verified']);
-    Route::post('/delete/product','deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
-    Route::post('/get/productByCategory','getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
+Route::controller(ProductController::class)->group(function () {
+    Route::get('/products', 'getProducts')->name('admin.products')->middleware(['auth', 'verified']);
+    Route::post('/add/product', 'addproduct')->name('add.product')->middleware(['auth', 'verified']);
+    Route::post('/edit/product', 'editProduct')->name('edit.product')->middleware(['auth', 'verified']);
+    Route::post('/update/product', 'updateProduct')->name('update.product')->middleware(['auth', 'verified']);
+    Route::post('/delete/product', 'deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
+    Route::post('/get/productByCategory', 'getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
     Route::get('/product-export', 'export')->name('products.export')->middleware(['auth', 'verified']);
 });
 
@@ -57,4 +60,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

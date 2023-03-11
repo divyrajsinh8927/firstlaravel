@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\LazyCollection;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpParser\Node\Expr\AssignOp\Concat;
+
+use function PHPUnit\Framework\returnSelf;
 
 class CategoryController extends Controller
 {
@@ -32,7 +35,7 @@ class CategoryController extends Controller
         $orderColumn = $request->order[0]['column'];
         if ($orderColumn == 0)
             $orderColumnName = "id";
-        elseif ($orderColumn == 2)
+        elseif ($orderColumn == 1)
             $orderColumnName = "category_name";
 
         $totalCategory = categories::where('isDelete', 0)->get()->count();
@@ -122,8 +125,55 @@ class CategoryController extends Controller
 
     public function importCsv(Request $request)
     {
-        $reader = fopen($request->categoryfile, "r");
-        // $error = Excel::import(new categoriesImport, $request->categoryfile);
-       
+        $skipedRowsNumber = [];
+        $duplicateEntry = [];
+        $InsertedRows = 0;
+        $FoundColumn = [];
+        $FoundColumnNumber = 0;
+
+        $rows   = array_map('str_getcsv', file($request->categoryfile));
+        // print_r($rows);
+        //Get the first row that is the HEADER row.
+        $header_row = array_shift($rows);
+        $notFound = [];
+        if (count($header_row) > 1) {
+            return  "<tr><td><span style='color: red;'>Unnassecry Coulumns Found only input category_name</span><td><tr>";
+        }
+        if (!in_array("category_name", $header_row)) {
+            $printMessage = "<tr><td><span style='color: red;'>Category_name Column Not Found</span><td><tr>";
+            array_push($notFound,$printMessage);
+        }
+
+        if(!empty($notFound))
+        {
+            return $notFound;
+        }
+        // return "<tr><td><span style='color: red;'> category_name Column Required </span><td><tr>";
+        //This array holds the final response.
+        $categories  = [];
+        foreach ($rows as $row) {
+            $arr_data = array_filter($row);
+            if (!empty($arr_data)) {
+                if (categories::where('category_name', $row)->exists()) {
+                    $duplicateLine = "<tr><td><span style='color: red;'>Duplicate Data Found At Row " . 1 . "</span><td><tr>";
+                    array_push($duplicateEntry, $duplicateLine);
+                } else {
+                    $categories[] = array_combine($header_row, $row);
+                    $InsertedRows = $InsertedRows + 1;
+                }
+            } else {
+                $blankline = "<tr><td><span style='color: red;'>Blank Data Found in line Row " .  1 . "</span><td><tr>";
+                array_push($skipedRowsNumber, $blankline);
+            }
+        }
+
+
+        categories::insert($categories);
+        $totalrecord = count($rows);
+        $insertrow = ["<tr><td><span style='color: green;'>Insert  $InsertedRows Rows From  $totalrecord Rows </span></td></tr>", "<tr><td><span style='color: green;'>Skip " . $totalrecord - $InsertedRows . " Rows From $totalrecord Rows</span></td></tr>"];
+        $allErrors = array_merge($skipedRowsNumber, $duplicateEntry);
+        $lastAllData = array_merge($allErrors, $insertrow);
+        return $lastAllData;
+
     }
 }
