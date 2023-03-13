@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\userManagement;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +27,11 @@ Route::get('/importCategory', function () {
 //logout
 Route::controller(AdminController::class)->group(function () {
     Route::get('admin/logout', 'destroy')->name('admin.logout');
+});
+
+Route::controller(userManagement::class)->group(function () {
+    Route::get('/userManagement', 'AllUsers')->name('admin.Alluser')->middleware(['auth', 'verified']);
+    Route::get('/table', 'get')->name('admin.table')->middleware(['auth', 'verified']);
 });
 
 //category Routes

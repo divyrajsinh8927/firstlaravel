@@ -209,12 +209,9 @@
                         beforeSend: function() {},
                         success: function(res) {
                             callback(res);
-                            if ($('#filterCategory').val() == 0 && checked.length == 0)
-                                categoryDataCount = res.totalProduct;
-                            else
-                                categoryDataCount = res.totalProduct;
+                                categoryDataCount = res.displayedProduct;
                             order = res.order;
-                            orderColumnName = res.displayedProduct;
+                            orderColumnName = res.orderColumnName;
                             $('#dataTable2_ajax_info').html("<b style='font-size: 15px;'>Found </b>&nbsp&nbsp<b style='font-size: 20px;'>" + res.displayedProduct + "</b> &nbsp&nbsp<b style='font-size: 15px;'> From Total </b>&nbsp&nbsp<b style='font-size: 20px;'>" + res.totalProduct + "</b><b style='font-size: 15px;'>  &nbsp&nbspProducts </b>");
                         }
                     });
@@ -274,10 +271,10 @@
                 });
                 if ($('#filterCategory').val() == -1)
                     var exportDataCount = checked.length;
-                else if ($('#filterCategory').val() == 0 && checked.length != 0)
-                    var exportDataCount = checked.length;
+                else if ($('#filterCategory').val() == 0 && checked.length == 0)
+                    var exportDataCount = categoryDataCount;
                 else
-                    var exportDataCount = checked.length + categoryDataCount;
+                    var exportDataCount = checked.length;
                 Swal.fire({
                     title: 'You Have Total ' + exportDataCount + ' Record to export',
                     text: "You won't to Export Product!",
@@ -289,7 +286,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         var ids = checked.join(",");
-                        var url = '/product-export' + '?ids=' + ids + '&' + $('#form-filter').serialize() + '&order=' + order + '&orderColumn=' + orderColumnName + 'rowLength=' + exportDataCount;
+                        var url = '/product-export' + '?ids=' + ids + '&' + $('#form-filter').serialize() + '&order=' + order + '&orderColumn=' + orderColumnName;
                         window.open(url, '_blank');
 
                         $("#checkAll").prop("checked", false)

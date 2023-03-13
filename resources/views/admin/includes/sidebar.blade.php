@@ -61,7 +61,7 @@
                                     <li><a href="#">hello 3</a></li>
                                 </ul>
                             </li>
-
+                            <li><a href="{{ route('admin.Alluser') }}"><i class="ti-map-alt"></i> <span>Users</span></a></li>
                             <li><a href="{{ route('admin.categories') }}"><i class="ti-map-alt"></i> <span>Categories</span></a></li>
                             <li><a href="{{ route('admin.products')}}"><i class="ti-receipt"></i> <span>Products</span></a></li>
 

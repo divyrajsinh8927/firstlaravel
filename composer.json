@@ -13,7 +13,8 @@
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
         "psr/simple-cache": "2.0",
-        "realrashid/sweet-alert": "^6.0"
+        "realrashid/sweet-alert": "^6.0",
+        "syamsoul/laravel-datatable-ssp": "^2.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

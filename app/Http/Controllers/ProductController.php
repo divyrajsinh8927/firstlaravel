@@ -135,7 +135,7 @@ class ProductController extends Controller
                 })->get()->count();
             $displayedProduct = $products->count();
             $res = array(
-                "orderColumn"  => $orderColumnName,
+                "orderColumnName"  => $orderColumnName,
                 "order"  => $order,
                 "totalProduct" => $totalProduct,
                 "displayedProduct" => $displayedProduct,
@@ -161,7 +161,7 @@ class ProductController extends Controller
             })->take($start, $length)->orderBy($orderColumnName, $order)->get()->count();
         $displayedProduct = $products->count();
         $res = array(
-            "orderColumn"  => $orderColumnName,
+            "orderColumnName"  => $orderColumnName,
             "order"  => $order,
             "totalProduct" => $totalProduct,
             "displayedProduct" => $displayedProduct,
