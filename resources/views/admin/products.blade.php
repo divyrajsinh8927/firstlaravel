@@ -16,9 +16,9 @@
 <p id="me"></p>
 <div class="dropdown col-lg-6 col-md-4 col-sm-6">
     <form id="form-filter" method="post">
-    <label for="Category" id="disp">Filter:</label>&nbsp&nbsp&nbsp
-    <select class="btn btn-rounded" id="filterCategory" name="filterCategory">
-    </select>
+        <label for="Category" id="disp">Filter:</label>&nbsp&nbsp&nbsp
+        <select class="btn btn-rounded" id="filterCategory" name="filterCategory">
+        </select>
     </form>
 </div>
 <button class="btn btn-primary mb-3" type="button" id="exportProducts" style="float: right; margin-right: 30px;" id="exportProducts">Export</button>
@@ -150,6 +150,10 @@
 
         $(document).ready(function() {
 
+            var categoryDataCount = 0;
+            var order = "";
+            var orderColumnName = "";
+
             $("#productImage").change(function() {
                 const file = this.files[0];
                 if (file) {
@@ -170,7 +174,7 @@
             });
 
 
-            var filtercategories = ['<option value="0">Category</option><option value="0">All Product</option>']
+            var filtercategories = ['<option value="-1" disabled>Select Category</option><option value="0">All Product</option>']
             $.ajax({
                 url: "{{route('get.categories')}}",
                 type: "GET",
@@ -205,6 +209,12 @@
                         beforeSend: function() {},
                         success: function(res) {
                             callback(res);
+                            if ($('#filterCategory').val() == 0 && checked.length == 0)
+                                categoryDataCount = res.totalProduct;
+                            else
+                                categoryDataCount = res.totalProduct;
+                            order = res.order;
+                            orderColumnName = res.displayedProduct;
                             $('#dataTable2_ajax_info').html("<b style='font-size: 15px;'>Found </b>&nbsp&nbsp<b style='font-size: 20px;'>" + res.displayedProduct + "</b> &nbsp&nbsp<b style='font-size: 15px;'> From Total </b>&nbsp&nbsp<b style='font-size: 20px;'>" + res.totalProduct + "</b><b style='font-size: 15px;'>  &nbsp&nbspProducts </b>");
                         }
                     });
@@ -262,12 +272,30 @@
                 $(".form-check-input:checked").each(function() {
                     checked.push($(this).val());
                 });
-                var ids = checked.join(",");
-                var url = '/product-export' + '?ids='+ids+'&' + $('#form-filter').serialize();                // var finalurl = url.replace("ids",ids);
-                window.open(url, '_blank');
+                if ($('#filterCategory').val() == -1)
+                    var exportDataCount = checked.length;
+                else if ($('#filterCategory').val() == 0 && checked.length != 0)
+                    var exportDataCount = checked.length;
+                else
+                    var exportDataCount = checked.length + categoryDataCount;
+                Swal.fire({
+                    title: 'You Have Total ' + exportDataCount + ' Record to export',
+                    text: "You won't to Export Product!",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Export it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var ids = checked.join(",");
+                        var url = '/product-export' + '?ids=' + ids + '&' + $('#form-filter').serialize() + '&order=' + order + '&orderColumn=' + orderColumnName + 'rowLength=' + exportDataCount;
+                        window.open(url, '_blank');
 
-                $("#checkAll").prop("checked", false)
-                $(".form-check-input:checked").prop("checked", false)
+                        $("#checkAll").prop("checked", false)
+                        $(".form-check-input:checked").prop("checked", false)
+                    }
+                });
             });
 
 

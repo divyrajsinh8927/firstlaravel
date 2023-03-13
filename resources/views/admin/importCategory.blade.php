@@ -38,21 +38,32 @@
 
             $('#import').submit(function(e) {
                 e.preventDefault();
-
-                var formData = new FormData(this);
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ route('import.categories') }}",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function(data) {
-                        // Swal.fire(
-                        //     'Imported!',
-                        //     'Category has been Imported.',
-                        //     'success'
-                        // )
-                        $("#errors").html(data);
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't to Import Category!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Import it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var formData = new FormData(this);
+                        $.ajax({
+                            type: 'POST',
+                            url: "{{ route('import.categories') }}",
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function(data) {
+                                // Swal.fire(
+                                //     'Imported!',
+                                //     'Category has been Imported.',
+                                //     'success'
+                                // )
+                                $("#errors").html(data);
+                            }
+                        });
                     }
                 });
             });

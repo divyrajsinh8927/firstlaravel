@@ -108,7 +108,6 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script type="text/javascript">
     window.addEventListener('DOMContentLoaded', function(event) {
@@ -286,39 +285,39 @@
             }
 
             //delete category
-            $(document).on('click', '.DeleteButton', function() {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't to Delete Category!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var id = $(this).data('id');
-                        $.ajax({
-                            type: 'POST',
-                            method: 'POST',
-                            url: "{{ route('delete.category') }}",
-                            data: {
-                                id: id,
-                            },
-                            success: function(data) {
-                                Swal.fire(
-                                    'Deleted!',
-                                    'Category has been deleted.',
-                                    'success'
-                                ).then(function() {
-                                    location.reload()
-                                })
-                            }
-                        });
-                    }
-                })
-            });
         });
+    });
+    $(document).on('click', '.DeleteButton', function() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't to Delete Category!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id = $(this).data('id');
+                $.ajax({
+                    type: 'POST',
+                    method: 'POST',
+                    url: "{{ route('delete.category') }}",
+                    data: {
+                        id: id,
+                    },
+                    success: function(data) {
+                        Swal.fire(
+                            'Deleted!',
+                            'Category has been deleted.',
+                            'success'
+                        ).then(function() {
+                            location.reload()
+                        })
+                    }
+                });
+            }
+        })
     });
 </script>
 

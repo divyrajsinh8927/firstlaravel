@@ -137,7 +137,7 @@ class CategoryController extends Controller
         $header_row = array_shift($rows);
         $notFound = [];
         if (count($header_row) > 1) {
-            return  "<tr><td><span style='color: red;'>Unnassecry Coulumns Found only input category_name</span><td><tr>";
+            return  "<tr><td><span style='color: red;'>Unnassecry Coulumns Found only take category_name and Remove other Columns</span><td><tr>";
         }
         if (!in_array("category_name", $header_row)) {
             $printMessage = "<tr><td><span style='color: red;'>Category_name Column Not Found</span><td><tr>";

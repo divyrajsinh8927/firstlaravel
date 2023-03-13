@@ -135,6 +135,8 @@ class ProductController extends Controller
                 })->get()->count();
             $displayedProduct = $products->count();
             $res = array(
+                "orderColumn"  => $orderColumnName,
+                "order"  => $order,
                 "totalProduct" => $totalProduct,
                 "displayedProduct" => $displayedProduct,
                 "recordsFiltered" => $filterdproducts,
@@ -159,6 +161,8 @@ class ProductController extends Controller
             })->take($start, $length)->orderBy($orderColumnName, $order)->get()->count();
         $displayedProduct = $products->count();
         $res = array(
+            "orderColumn"  => $orderColumnName,
+            "order"  => $order,
             "totalProduct" => $totalProduct,
             "displayedProduct" => $displayedProduct,
             "recordsFiltered" => $filterdproducts,
@@ -172,6 +176,8 @@ class ProductController extends Controller
     {
         $ids = $request->ids;
         $filter = $request->filterCategory;
+        $order = $request->order;
+        $orderColumn = $request->orderColumn;
 
         $where_sql = '';
         $where = [];
@@ -187,7 +193,7 @@ class ProductController extends Controller
 
         $where_sql = implode(' AND ', $where);
 
-        $query = "SELECT products.id, products.product_name, products.isDelete, categories.category_name FROM products LEFT JOIN categories ON products.category_id = categories.id $where_sql";
+        $query = "SELECT products.id, products.product_name, products.isDelete, categories.category_name FROM products LEFT JOIN categories ON products.category_id = categories.id $where_sql ORDER BY $orderColumn $order";
         $products = DB::select($query);
 
         $headers = array("id", "product_name", "category_name");
@@ -206,8 +212,8 @@ class ProductController extends Controller
                 $pdata = [];
 
                 $pdata[] = $row->id;
-				$pdata[] = $row->product_name;
-				$pdata[] = $row->category_name;
+                $pdata[] = $row->product_name;
+                $pdata[] = $row->category_name;
 
                 fputcsv($handle, $pdata);
             }
