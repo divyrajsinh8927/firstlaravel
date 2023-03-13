@@ -265,6 +265,9 @@
                 var ids = checked.join(",");
                 var url = '/product-export' + '?ids='+ids+'&' + $('#form-filter').serialize();                // var finalurl = url.replace("ids",ids);
                 window.open(url, '_blank');
+
+                $("#checkAll").prop("checked", false)
+                $(".form-check-input:checked").prop("checked", false)
             });
 
 
