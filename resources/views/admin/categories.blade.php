@@ -284,9 +284,9 @@
                 });
             }
 
-            //delete category
         });
     });
+    //delete category
     $(document).on('click', '.DeleteButton', function() {
         Swal.fire({
             title: 'Are you sure?',

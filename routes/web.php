@@ -30,8 +30,10 @@ Route::controller(AdminController::class)->group(function () {
 });
 
 Route::controller(userManagement::class)->group(function () {
-    Route::get('/userManagement', 'AllUsers')->name('admin.Alluser')->middleware(['auth', 'verified']);
-    Route::get('/table', 'get')->name('admin.table')->middleware(['auth', 'verified']);
+    Route::get('/userManagement', 'list')->name('admin.list')->middleware(['auth', 'verified']);
+    Route::get('/admin/table', 'get')->name('admin.table')->middleware(['auth', 'verified']);
+    Route::post('/user/delete', 'deleteUser')->name('user.delete')->middleware(['auth', 'verified']);
+    Route::post('/user/update', 'updateUser')->name('user.update')->middleware(['auth', 'verified']);
 });
 
 //category Routes
