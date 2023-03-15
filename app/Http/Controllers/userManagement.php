@@ -18,7 +18,7 @@ class userManagement extends Controller
         ]);
     }
 
-    public function get(Request $request)
+    public function get()
     {
         $dt_obj = $this->dtSsp();
         return response()->json($dt_obj->getDtArr());
