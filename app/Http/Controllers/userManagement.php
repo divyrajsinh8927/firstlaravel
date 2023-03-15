@@ -27,7 +27,9 @@ class userManagement extends Controller
     private function dtSsp()
     {
         $dt = [
+
             ['label' => 'id',         'db' => 'id',            'dt' => 0, 'formatter' => function ($value, $model) {
+
                 return str_pad($value, 5, '0', STR_PAD_LEFT);
             }],
             ['label' => 'name',       'db' => 'name',          'dt' => 1,'formatter'=>function( $value, $model){
@@ -36,9 +38,15 @@ class userManagement extends Controller
                 ];
                 return implode(" ",$name);
             }],
-            ['label' => 'email',      'db' => 'email',         'dt' => 2],
-            ['label' => 'created_at', 'db' => 'created_at',    'dt' => 3],
-            ['label'=>'Action',     'db'=>'id',            'dt'=>4, 'formatter'=>function( $value, $model){
+            ['label' => 'email',      'db' => 'email',         'dt' => 2,'formatter'=>function( $value, $model){
+                $name = [
+                    '<a href="javascript:void(0)" class="xedit" data-type="email" data-pk="'.$model->id.'" data-title="Enter Email" data-name="email" > '. $value .'</a>',
+                ];
+                return implode(" ",$name);
+            }],
+            ['label' => 'created_at', 'db' => 'created_at' ,    'dt' => 3] ,
+
+            ['label'=>'Action',     'db'=>'id', 'dt'=>4, 'formatter'=>function( $value, $model){
                 $btns = [
                     '<span class="DeleteButton" style="float:right; margin-right: 25%" data-id="'.$value.'"><i class="fa fa-trash fa-2x" style="color: red; cursor: pointer;"></i></span>',
                 ];
@@ -46,7 +54,7 @@ class userManagement extends Controller
             }],
         ];
 
-        return (new SSP('App\Models\User', $dt))->where('is_delete','0');
+        return (new SSP('users', $dt))->where('status',1)->where('is_delete',0);
 
     }
 
@@ -62,11 +70,8 @@ class userManagement extends Controller
     public function updateUser(Request $request)
     {
         if($request->ajax()){
-
             User::find($request->input('pk'))->update([$request->input('name') => $request->input('value')]);
-
             return response()->json(['success' => true]);
-
         }
     }
 }

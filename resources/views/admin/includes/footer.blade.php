@@ -9,7 +9,8 @@
 <!-- Start datatable js -->
 <script src="{{ asset('admin/assets/js/jquery.dataTables.js')}}"></script>
 <script src="{{ asset('admin/assets/js/jquery.dataTables.min.js')}}"></script>
-<script src="{{ asset('admin/assets/js/dataTables.bootstrap4.min.js')}}"></script>
+<script src="{{ asset('admin/assets/js/dataTables.bootstrap4.min.js')}}">
+</script>
 
 <script src="{{ asset('admin/assets/js/bootstrap-editable.js') }}">
 </script>

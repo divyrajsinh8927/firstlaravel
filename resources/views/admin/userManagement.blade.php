@@ -20,10 +20,6 @@
             </div>
         </div>
         <script>
-            var dt_info_lable = {!! json_encode($dt_info['labels']) !!};
-            var dt_info_order = '<?= json_encode($dt_info['order']) ?>';
-
-
             $(document).ready(function() {
                 $.ajaxSetup({
                     headers: {
@@ -31,12 +27,10 @@
                     }
                 });
 
-                $('#datatable_user').DataTable({
+               var datatable = $('#datatable_user').DataTable({
 
                     processing: true,
                     serverSide: true,
-                    deferRender: true,
-                    orderCellsTop: true,
                     ajax: getSiteUrl() + "/admin/table",
                     columns: {!! json_encode($dt_info['labels']) !!},
                     order: {!! json_encode($dt_info['order']) !!},
@@ -46,24 +40,29 @@
                 function editable(pk = 0, name = "", type = "") {
                     $('.xedit').editable({
                         url: "{{ route('user.update') }}",
-                        title: 'Update',
+                        title: 'UpdateUser',
                         type: type,
                         pk: pk,
                         name: name,
                         success: function(response, newValue) {
-                            console.log('Updated', response)
+                            Swal.fire(
+                                'Updated!',
+                                'user has been Updated.',
+                                'success'
+                            ).then(function() {
+                                datatable.ajax.reload();
+                            })
                         }
 
                     });
                 }
+
                 $(document).on('click', '.xedit', function() {
                     var id = $(this).data('pk');
                     var name = $(this).data('name');
                     var type = $(this).data('type');
-                    editable(id,name,type)
+                    editable(id, name, type)
                 });
-
-
 
             });
 
