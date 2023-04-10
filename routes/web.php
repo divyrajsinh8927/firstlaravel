@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\frontend\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\userManagement;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,13 @@ Route::controller(ProductController::class)->group(function () {
     Route::post('/delete/product', 'deleteProduct')->name('delete.product')->middleware(['auth', 'verified']);
     Route::post('/get/productByCategory', 'getProductsByCategory')->name('cat.product')->middleware(['auth', 'verified']);
     Route::get('/product-export', 'export')->name('products.export')->middleware(['auth', 'verified']);
+});
+
+
+// frontend
+
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/home', 'index')->name('frontend.home');
 });
 
 // Route::get('/dashboard', function () {
