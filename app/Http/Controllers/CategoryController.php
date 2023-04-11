@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Imports\categoriesImport;
 use Illuminate\Support\Facades\Validator;
-use App\Models\categories;
+use App\Models\sub_categories;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -38,15 +38,15 @@ class CategoryController extends Controller
         elseif ($orderColumn == 1)
             $orderColumnName = "category_name";
 
-        $totalCategory = categories::where('isDelete', 0)->get()->count();
-        $categories = categories::where('isDelete', 0)->where(function ($query) {
+        $totalCategory = sub_categories::where('isDelete', 0)->get()->count();
+        $categories = sub_categories::where('isDelete', 0)->where(function ($query) {
             global $search;
             $query->where('id', 'LIKE', '%' . $search . '%')
                 ->orWhere('category_name', 'LIKE', '%' . $search . '%');
         })->skip($start)->take($length)
             ->orderBy($orderColumnName, $order)->get();
         $displayedCategories = $categories->count();
-        $filterdCategories = categories::where('isDelete', 0)->where(function ($query) {
+        $filterdCategories = sub_categories::where('isDelete', 0)->where(function ($query) {
             global $search;
             $query->where('id', 'LIKE', '%' . $search . '%')
                 ->orWhere('category_name', 'LIKE', '%' . $search . '%');
@@ -73,7 +73,7 @@ class CategoryController extends Controller
             ]);
         }
 
-        categories::insert([
+        sub_categories::insert([
             'category_name' => $request->categoryName,
             'created_at' => Carbon::now()
         ]);
@@ -83,7 +83,7 @@ class CategoryController extends Controller
 
     public function editCategory(Request $request)
     {
-        $editCategory = categories::findOrFail($request->id);
+        $editCategory = sub_categories::findOrFail($request->id);
         return response()->json($editCategory);
     }
 
@@ -99,7 +99,7 @@ class CategoryController extends Controller
             ]);
         }
 
-        categories::findOrFail($request->id)->update([
+        sub_categories::findOrFail($request->id)->update([
             'category_name' => $request->updateCategory,
             'updated_at' => Carbon::now(),
         ]);
@@ -108,7 +108,7 @@ class CategoryController extends Controller
 
     public function deleteCategory(Request $request)
     {
-        $updateCategory = categories::findOrFail($request->id)->update([
+        $updateCategory = sub_categories::findOrFail($request->id)->update([
             'isDelete' => 1,
             'updated_at' => Carbon::now(),
         ]);
@@ -117,7 +117,7 @@ class CategoryController extends Controller
 
     public function getCategoriesForOption()
     {
-        $categories = categories::where('isDelete', 0)->get();
+        $categories = sub_categories::where('isDelete', 0)->get();
         return response()->json($categories);
     }
 
@@ -154,7 +154,7 @@ class CategoryController extends Controller
         foreach ($rows as $row) {
             $arr_data = array_filter($row);
             if (!empty($arr_data)) {
-                if (categories::where('category_name', $row)->exists()) {
+                if (sub_categories::where('category_name', $row)->exists()) {
                     $duplicateLine = "<tr><td><span style='color: red;'>Duplicate Data Found At Row " . 1 . "</span><td><tr>";
                     array_push($duplicateEntry, $duplicateLine);
                 } else {
@@ -168,7 +168,7 @@ class CategoryController extends Controller
         }
 
 
-        categories::insert($categories);
+        sub_categories::insert($categories);
         $totalrecord = count($rows);
         $insertrow = ["<tr><td><span style='color: green;'>Insert  $InsertedRows Rows From  $totalrecord Rows </span></td></tr>", "<tr><td><span style='color: green;'>Skip " . $totalrecord - $InsertedRows . " Rows From $totalrecord Rows</span></td></tr>"];
         $allErrors = array_merge($skipedRowsNumber, $duplicateEntry);

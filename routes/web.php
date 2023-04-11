@@ -64,6 +64,8 @@ Route::controller(ProductController::class)->group(function () {
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/home', 'index')->name('frontend.home');
+    Route::post('/subCategory', 'getSubCategory')->name('frontend.getSubCategory');
+    Route::get('/sub_cat_product/{id}', 'getProductBySubCategory');
 });
 
 // Route::get('/dashboard', function () {

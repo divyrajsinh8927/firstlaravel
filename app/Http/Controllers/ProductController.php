@@ -25,6 +25,7 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'productImage' => 'required',
             'txtProductName' => 'required',
+            'txtProductPrice' => 'required',
             'category' => 'required',
         ]);
 
@@ -43,6 +44,7 @@ class ProductController extends Controller
         product::insert([
             'product_name' => $request->txtProductName,
             'product_image' => $save_url,
+            'product_price' => $request->txtProductPrice,
             'category_id' => $request->category,
             'created_at' => Carbon::now()
         ]);
@@ -60,6 +62,7 @@ class ProductController extends Controller
     {
         $updatevalidator = Validator::make($request->all(), [
             'txtUpdateProductName' => 'required',
+            'txtUpdateProductPrice' => 'required',
             'updateCategory' => 'required',
         ]);
 
@@ -82,6 +85,7 @@ class ProductController extends Controller
         product::findOrFail($request->updateid)->update([
             'product_name' => $request->txtUpdateProductName,
             'product_image' => $save_url,
+            'product_price' => $request->txtUpdateProductPrice  ,
             'category_id' => $request->updateCategory,
             'updated_at' => Carbon::now()
         ]);
@@ -118,20 +122,20 @@ class ProductController extends Controller
         $order = $request->order[0]['dir'];
         $totalProduct = product::where('isDelete', 0)->get()->count();
         if ($category_id == 0) {
-            $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
-                ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
+            $products = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price' ,'products.isDelete', 'sub_categories.category_name as category_name')
+                ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
                     global $search;
                     $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                         ->orWhere('products.id', 'LIKE', '%' . $search . '%')
-                        ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+                        ->orWhere('sub_categories.category_name', 'LIKE', '%' . $search . '%');
                 })->skip($start)->take($length)
                 ->orderBy($orderColumnName, $order)->get();
-            $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
-                ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
+            $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
+                ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
                     global $search;
                     $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                         ->orWhere('products.id', 'LIKE', '%' . $search . '%')
-                        ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+                        ->orWhere('sub_categories.category_name', 'LIKE', '%' . $search . '%');
                 })->get()->count();
             $displayedProduct = $products->count();
             $res = array(
@@ -145,19 +149,19 @@ class ProductController extends Controller
             );
             return response()->json($res);
         }
-        $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
-            ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
+        $products = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
+            ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
                 global $search;
                 $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                     ->orWhere('products.id', 'LIKE', '%' . $search . '%')
-                    ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+                    ->orWhere('sub_categories.category_name', 'LIKE', '%' . $search . '%');
             })->skip($start)->take($length)->get();
-        $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.isDelete', 'Categories.category_name as category_name')
-            ->join('categories', 'categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
+        $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
+            ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
                 global $search;
                 $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                     ->orWhere('products.id', 'LIKE', '%' . $search . '%')
-                    ->orWhere('Categories.category_name', 'LIKE', '%' . $search . '%');
+                    ->orWhere('sub_categories.category_name', 'LIKE', '%' . $search . '%');
             })->take($start, $length)->orderBy($orderColumnName, $order)->get()->count();
         $displayedProduct = $products->count();
         $res = array(
@@ -193,10 +197,10 @@ class ProductController extends Controller
 
         $where_sql = implode(' AND ', $where);
 
-        $query = "SELECT products.id, products.product_name, products.isDelete, categories.category_name FROM products LEFT JOIN categories ON products.category_id = categories.id $where_sql ORDER BY $orderColumn $order";
+        $query = "SELECT products.id, products.product_name,products.product_price, products.isDelete, sub_categories.category_name FROM products LEFT JOIN sub_categories ON products.category_id = sub_categories.id $where_sql ORDER BY $orderColumn $order";
         $products = DB::select($query);
 
-        $headers = array("id", "product_name", "category_name");
+        $headers = array("id", "product_name", "category_name","produuct_price");
         $filename = 'products' . date('d_m_Y_H_i_s');
         header("Content-type: application/csv");
         header("Content-Disposition: attachment; filename=\"$filename" . ".csv\"");
@@ -214,6 +218,7 @@ class ProductController extends Controller
                 $pdata[] = $row->id;
                 $pdata[] = $row->product_name;
                 $pdata[] = $row->category_name;
+                $pdata[] = $row->product_price;
 
                 fputcsv($handle, $pdata);
             }

@@ -35,7 +35,8 @@
                             <th>id</th>
                             <th>Product Image</th>
                             <th>Product Name</th>
-                            <th>Category Name</th>
+                            <th>Product Price</th>
+                            <th>Sub-Category Name</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -81,6 +82,10 @@
                         <input type="text" class="form-control" id="txtProductName" placeholder="Enter Producut Name" name="txtProductName">
                     </div>
                     <div class="form-group">
+                        <label for="categoryName">Product Price</label>
+                        <input type="text" class="form-control" id="txtProductPrice" placeholder="Enter Producut Price In Rupees" name="txtProductPrice">
+                    </div>
+                    <div class="form-group">
                         <label for="categoryName">Category</label>
                         <select name="category" id="category" placeholder="Select Categoroy" class="form-control">
 
@@ -121,6 +126,10 @@
                         <input type="hidden" name="updateid" id="updateid">
                         <label for="categoryName">Product Name</label>
                         <input type="text" class="form-control" id="txtUpdateProductName" placeholder="Enter Producut Name" name="txtUpdateProductName">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryName">Product Price</label>
+                        <input type="text" class="form-control" id="txtUpdateProductPrice" placeholder="Enter Producut Price In Rupees" name="txtUpdateProductPrice">
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Category</label>
@@ -244,6 +253,9 @@
                     },
                     {
                         'data': 'product_name',
+                    },
+                    {
+                        'data': 'product_price',
                     },
                     {
                         'data': 'category_name',
@@ -390,6 +402,7 @@
                     success: function(data) {
                         $('#updateid').val(data.id);
                         $('#txtUpdateProductName').val(data.product_name);
+                        $('#txtUpdateProductPrice').val(data.Product_price);
                         $('#updateCategory').val(data.category_id);
                     }
                 });
