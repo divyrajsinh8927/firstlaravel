@@ -37,21 +37,25 @@
                             </div>
                             <div class="form-group">
                                 <label for="your_pass"><i class="zmdi zmdi-lock"></i></label>
-                                <input type="password" name="password" id="password" placeholder="Your Password" required />
+                                <input type="password" name="password" id="password" placeholder="Your Password"
+                                    required />
                             </div>
                             <div class="form-group">
-                                <x-input-error :messages="$errors->get('email')" class="mt-2" style="color: red;"/>
+                                <x-input-error :messages="$errors->get('email')" class="mt-2" style="color: red;" />
                                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
                                 <input type="checkbox" name="remember" id="remember-me" class="agree-term" />
-                                <label for="remember-me" class="label-agree-term"><span><span></span></span>Remember me</label>
+                                <label for="remember-me" class="label-agree-term"><span><span></span></span>Remember
+                                    me</label>
                             </div>
                             <div class="form-group form-button">
-                                <input type="submit" name="signin" id="signin" class="form-submit" value="Log in" />
+                                <input type="submit" name="signin" id="signin" class="form-submit"
+                                    value="Log in" />
                             </div>
                         </form>
                         <div class="social-login">
                             <span class="social-label">Or login with</span>
                             <ul class="socials">
+                                <li><a href="{{ route('phone.login') }}"><i class="display-flex-center zmdi zmdi-phone" style="background-color: rgb(62, 62, 62)"></i></a></li>
                                 <li><a href="#"><i class="display-flex-center zmdi zmdi-facebook"></i></a></li>
                                 <li><a href="#"><i class="display-flex-center zmdi zmdi-twitter"></i></a></li>
                                 <li><a href="#"><i class="display-flex-center zmdi zmdi-google"></i></a></li>
@@ -64,6 +68,65 @@
         <!-- JS -->
         <script src="{{ asset('admin/assets/js/vendor/jquery/jquery.min.js') }}"></script>
         <script src="{{ asset('admin/assetsjs/main.js') }}"></script>
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-analytics.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+              apiKey: "AIzaSyD-diidBNa6h64kY9GBfC9S9Ucf0ups4Hc",
+              authDomain: "fashon-4dcea.firebaseapp.com",
+              projectId: "fashon-4dcea",
+              storageBucket: "fashon-4dcea.appspot.com",
+              messagingSenderId: "94436826526",
+              appId: "1:94436826526:web:ae2f44e2513d68e9530a8f",
+              measurementId: "G-9LPMV1S7WS"
+            };
+
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+          </script>
+        <script type="text/javascript">
+            window.onload = function() {
+                render();
+            };
+
+            function render() {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+                recaptchaVerifier.render();
+            }
+
+            function sendOTP() {
+                var number = $("#number").val();
+                firebase.auth().signInWithPhoneNumber(number, window.recaptchaVerifier).then(function(confirmationResult) {
+                    window.confirmationResult = confirmationResult;
+                    coderesult = confirmationResult;
+                    console.log(coderesult);
+                    $("#successAuth").text("Message sent");
+                    $("#successAuth").show();
+                }).catch(function(error) {
+                    $("#error").text(error.message);
+                    $("#error").show();
+                });
+            }
+
+            function verify() {
+                var code = $("#verification").val();
+                coderesult.confirm(code).then(function(result) {
+                    var user = result.user;
+
+
+                }).catch(function(error) {
+                    $("#error").text(error.message);
+                    $("#error").show();
+                });
+            }
+        </script>
 </body><!-- This templates was made by Colorlib (https://colorlib.com) -->
 
 </html>

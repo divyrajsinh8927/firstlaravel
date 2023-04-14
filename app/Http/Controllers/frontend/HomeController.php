@@ -23,7 +23,6 @@ class HomeController extends Controller
 
             $perentCategoriesArray[$perentCategoryId] = ['cat_id' => $perentCategoryId, 'cat_name' => $perentCategoryName, 'sub_cat' => []];
 
-            //= ['cat_id' => $perentCategoryId ,'cate_name'=> $perentCategoryName];
 
             $subCategories = sub_categories::all()->where('isDelete', 0)->where('category_id', $perentCategoryId);
 
@@ -37,7 +36,6 @@ class HomeController extends Controller
             }
 
             $perentCategoriesArray[$perentCategoryId]['sub_cat'] = $subCategoriesArray;
-            //array_push($perentCategoriesArray, $fullDataarray);
         }
         return $perentCategoriesArray;
     }
@@ -52,7 +50,6 @@ class HomeController extends Controller
     {
         $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id',$req->id)->get();
         $cat_data = $this->getAllTypeCategory();
-        //  dd($products);
         return view('frontend.home')->with(compact('cat_data', 'products'));
     }
 }

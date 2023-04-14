@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\frontend\AddToCartController;
+use App\Http\Controllers\frontend\FrontendProductController;
+use App\Http\Controllers\frontend\OrderProductController;
 use App\Http\Controllers\frontend\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\userManagement;
@@ -67,6 +70,19 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/home', 'index')->name('frontend.home');
     Route::post('/subCategory', 'getSubCategory')->name('frontend.getSubCategory');
     Route::get('/sub_cat_product/{id}', 'getProductBySubCategory');
+});
+
+Route::controller(FrontendProductController::class)->group(function () {
+    Route::get('/single_product/{id}', 'index')->name('frontend.single_product');
+});
+
+Route::controller(OrderProductController::class)->group(function () {
+    Route::post('/order', 'placeOrder')->name('frontend.order.product');
+});
+
+Route::controller(AddToCartController::class)->group(function () {
+    Route::post('/addCart', 'addToCart')->name('frontend.Add.product.cart');
+    Route::get('/CartProducts', 'viewCart')->name('frontend.cart.product');
 });
 
 // Route::get('/dashboard', function () {

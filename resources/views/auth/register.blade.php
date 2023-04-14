@@ -35,6 +35,10 @@
                                 <input type="email" name="email" id="email" placeholder="Your Email" required/>
                             </div>
                             <div class="form-group">
+                                <label for="mobile_number"><i class="zmdi zmdi-phone"></i></label>
+                                <input type="tel" name="mobile_number" id="mobile_number" placeholder="Your Mobile Number" required/>
+                            </div>
+                            <div class="form-group">
                                 <label for="pass"><i class="zmdi zmdi-lock"></i></label>
                                 <input type="password" name="password" id="password" placeholder="Your Password" required autocomplete="new-password"/>
                             </div>
