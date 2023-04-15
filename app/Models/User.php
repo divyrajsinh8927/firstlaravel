@@ -28,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'status',
         'is_delete',
         'updated_at',
+        'device_token'
     ];
     /**
      * The attributes that should be hidden for serialization.

@@ -49,7 +49,7 @@
                                     </div>
                                     <div class="col-sm-4">
                                         <input type="number" class="form-control" id="txtquantity" name="txtquantity"
-                                            placeholder="quantity" onchange="displayTotalPrice()">
+                                            placeholder="quantity">
                                     </div>
                                 </div><br>
                                 <div class="row">

@@ -61,12 +61,6 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        session_start();
-        if (isset($_SESSION['user'])) {
-            session_unset();
-            session_destroy();
-            return redirect('/');
-        }
 
         Auth::guard('web')->logout();
 

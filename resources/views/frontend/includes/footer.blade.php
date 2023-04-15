@@ -67,33 +67,6 @@
       </div>
       <!-- copyright section end -->
       <!-- Javascript files-->
-      <script>
-          window.addEventListener('DOMContentLoaded', function(event) {
-                      $.ajaxSetup({
-                          headers: {
-                              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                          }
-                      });
-                      $(document).on('click', '#subid', function() {
-                              alert("hello")
-                              var subCategories = ['']
-                              $.ajax({
-                                      url: "{{ route('frontend.getSubCategory') }}",
-                                      type: "POST",
-                                      dataType: 'json',
-                                      success: function(data) {
-                                          for (var i = 0; i < data.length; i++) {
-                                              var row = $('<li class = "nav-item" ><a href = '
-                                                  '
-                                                  class = "nav-link text-small pb-0" > < /a></li > ');
-                                                  subCategories.push(row)
-                                              }
-                                              $(".list-unstyled").html(subCategories);
-                                          }
-                                      });
-                              });
-                      });
-      </script>
       <script src="{{ asset('frontend/js/jquery.min.js') }}"></script>
       <script src="{{ asset('frontend/js/popper.min.js') }}"></script>
       <script src="{{ asset('frontend/js/bootstrap.bundle.min.js') }}"></script>

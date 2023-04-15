@@ -9,6 +9,7 @@ use App\Http\Controllers\frontend\FrontendProductController;
 use App\Http\Controllers\frontend\OrderProductController;
 use App\Http\Controllers\frontend\HomeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\NotificationSendController;
 use App\Http\Controllers\userManagement;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {
-        Route::get('/', 'create')->name('auth.login');
+    Route::get('/', 'create')->name('auth.login');
 });
 Route::get('/importCategory', function () {
     return view('admin.importCategory');
@@ -63,6 +64,8 @@ Route::controller(ProductController::class)->group(function () {
     Route::get('/product-export', 'export')->name('products.export')->middleware(['auth', 'verified']);
 });
 
+Route::post('/store-token', [NotificationSendController::class, 'updateDeviceToken'])->name('store.token');
+Route::post('/send-web-notification', [NotificationSendController::class, 'sendNotification'])->name('send.web-notification');
 
 // frontend
 
@@ -83,6 +86,7 @@ Route::controller(OrderProductController::class)->group(function () {
 Route::controller(AddToCartController::class)->group(function () {
     Route::post('/addCart', 'addToCart')->name('frontend.Add.product.cart');
     Route::get('/CartProducts', 'viewCart')->name('frontend.cart.product');
+    Route::post('/cartorder', 'placeCartOrder')->name('frontend.cart.order.product');
 });
 
 // Route::get('/dashboard', function () {

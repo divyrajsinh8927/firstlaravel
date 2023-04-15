@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Bookoing;
+use App\Models\orders;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Providers\RouteServiceProvider as Serviceprovider;
@@ -17,11 +17,7 @@ class OrderProductController extends Controller
             return redirect()->intended(Serviceprovider::LOGIN);
         }
 
-        $price = $request->txtprice;
-        $quantity = $request->txtquantity;
-        $adderess = $request->txtAddress;
-
-        Bookoing::insert([
+        orders::insert([
             'user_id' => $_SESSION['user'],
             'product_id' => $request->txtProductId,
             'address' => $request->txtAddress,
