@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\SendPushNotification;
+use Illuminate\Support\Facades\Auth;
 
 class AddToCartController extends Controller
 {
@@ -116,7 +117,6 @@ class AddToCartController extends Controller
                     'created_at' => Carbon::now()
                 ]);
             }
-            $user = User::select('fcm_tokens')->where('id', $_SESSION['user'])->first();
             $message = "Your Order of " . $cartProduct_value['product_quantity'] . "Is Placed";
             $NotificationSendController = new NotificationSendController();
             $NotificationSendController->sendNotification("Order Placed",$message);
