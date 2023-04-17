@@ -11,6 +11,7 @@ class sub_categories extends Model
     protected $fillable = [
         'category_name',
         'isDelete',
+        'category_id',
         'created_at',
         'updated_at',
     ];

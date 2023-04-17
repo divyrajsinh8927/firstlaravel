@@ -1,24 +1,43 @@
+@extends('admin.adminMaster')
 @section('admin')
+    <!-- page title area start -->
     <div class="main-content">
-        <div class="page-title-area" style="margin-top: 20px;">
-            <div class="row align-items-center">
-                <div class="col-sm-12">
-                    <h1 class="page-title pull-left" style="margin-top: 5px;">Users</h1>
-                </div>
-            </div>
-        </div>
+        <!-- page title area end -->
         <div class="col-12 mt-5">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Users Data</h4>
+                    <h4 class="header-title">Categories Data</h4>
                     <div class="data-tables datatable-dark">
-                        <table id="datatable_user" class="text-center">
+                        <table id="dataTable2_ajax" class="text-center">
+                            <thead class="text-capitalize">
+                                <tr>
+                                    <th>SL</th>
+                                    <th>User</th>
+                                    <th>Product</th>
+                                    <th>Address</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>OrderDateTime</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-        <script>
+        <!-- Dark table end -->
+    </div>
+    </div>
+    </div>
+    <!-- main content area end -->
+    </div>
+    <script>
+        window.addEventListener('DOMContentLoaded', function(event) {
             $(document).ready(function() {
                 $.ajaxSetup({
                     headers: {
@@ -26,78 +45,170 @@
                     }
                 });
 
-               var datatable = $('#datatable_user').DataTable({
-
+                var order_id;
+                search_param = {};
+                table = $('#dataTable2_ajax').DataTable({
                     processing: true,
                     serverSide: true,
-                    ajax: getSiteUrl() + "/admin/table",
-                    columns: {!! json_encode($dt_info['labels']) !!},
-                    order: {!! json_encode($dt_info['order']) !!},
-                });
-
-
-                function editable(pk = 0, name = "", type = "") {
-                    $('.xedit').editable({
-                        url: "{{ route('user.update') }}",
-                        title: 'UpdateUser',
-                        type: type,
-                        pk: pk,
-                        name: name,
-                        success: function(response, newValue) {
-                            Swal.fire(
-                                'Updated!',
-                                'user has been Updated.',
-                                'success'
-                            ).then(function() {
-                                datatable.ajax.reload();
-                            })
-                        }
-
-                    });
-                }
-
-                $(document).on('click', '.xedit', function() {
-                    var id = $(this).data('pk');
-                    var name = $(this).data('name');
-                    var type = $(this).data('type');
-                    editable(id, name, type)
-                });
-
-            });
-
-
-
-            $(document).on('click', '.DeleteButton', function() {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't to Delete Category!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var id = $(this).data('id');
+                    deferRender: true,
+                    orderCellsTop: true,
+                    ajax: function(data, callback) {
+                        $.each(search_param, function(k, v) {});
                         $.ajax({
-                            type: 'POST',
-                            method: 'POST',
-                            url: "{{ route('user.delete') }}",
-                            data: {
-                                id: id,
-                            },
-                            success: function(data) {
+                            url: "{{ route('Admin.All.Orders') }}",
+                            data: data,
+                            type: "post",
+                            dataType: 'json',
+                            beforeSend: function() {},
+                            success: function(res) {
+                                callback(res);
+                            }
+                        });
+                    },
+                    'columns': [{
+                            'data': 'id',
+                            render: function(data, type, row, meta) {
+                                order_id = data;
+                                return '<span class="">' + order_id + '</span>'
+                            }
+                        },
+                        {
+                            'data': 'user_name',
+                        },
+                        {
+                            'data': 'product_name',
+                        },
+                        {
+                            'data': 'address',
+                            'orderable': false,
+                        },
+                        {
+                            'data': 'quantity',
+                        },
+                        {
+                            'data': 'price',
+                        },
+                        {
+                            'data': 'status',
+                            'orderable': false,
+                            render: function(data, type, row, meta) {
+                                if (data == null) {
+                                    return '<span class="">Waiting</span>'
+                                }
+                                if (data == 0) {
+                                    return '<span class="">Canceled</span>'
+                                }
+                                if (data == 1) {
+                                    return '<span class="">Confirmed</span>'
+                                }
+                            }
+                        },
+                        {
+                            'data': 'created_at',
+                        },
+                        {
+                            'data': 'status',
+                            'orderable': false,
+                            render: function(data, type, row, meta) {
+                                if (data == null) {
+                                    return '<span class="ConfirmOrder" style="float:left; margin-left: 10%;margin-right: 10%; cursor: pointer" data-id="' +
+                                        order_id +
+                                        '"><i class="fa fa-check fa-2x"></i></span><span class="cancelOrder" style="float:right; margin-right: 25%" data-id="' +
+                                        order_id +
+                                        '"><i class="fa fa-times fa-2x" style="color: red; cursor: pointer;"></i></span>';
+                                }
+                                if (data == 1) {
+                                    return '<span class="">Confirmed</span>'
+                                }
+                                if (data == 0) {
+                                    return '<span class="">Canceled</span>'
+                                }
+                                if (data == 2) {
+                                    return '<span class="">Delivered</span>'
+                                }
+                            }
+                        },
+                    ]
+                });
+            });
+        });
+
+
+        $(document).on('click', '.ConfirmOrder', function() {
+            Swal.fire({
+                title: 'Confirm',
+                text: "You won't to Confirm Order!",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Confirm it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var id = $(this).data('id');
+                    $.ajax({
+                        type: 'POST',
+                        method: 'put',
+                        url: "{{ route('Admin.confirm.Orders') }}",
+                        data: {
+                            id: id,
+                        },
+                        success: function(data) {
+                            if (data.success) {
                                 Swal.fire(
-                                    'Deleted!',
-                                    'user has been deleted.',
+                                    'Confirm!',
+                                    'Order has been Confirmed.',
                                     'success'
                                 ).then(function() {
                                     location.reload()
                                 })
                             }
-                        });
-                    }
-                })
-            });
-        </script>
-    @endsection
+                            else{
+                                Swal.fire(
+                                    'Confirm!',
+                                    'Order has been Confirmed But SMS Not send.',
+                                    'warning'
+                                ).then(function() {
+                                })
+                            }
+                        }
+                    });
+                }
+            })
+        });
+
+
+        $(document).on('click', '.cancelOrder', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't to Reject Order!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Reject it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var id = $(this).data('id');
+                    $.ajax({
+                        type: 'POST',
+                        method: 'delete',
+                        url: "{{ route('Admin.Reject.Orders') }}",
+                        data: {
+                            id: id,
+                        },
+                        success: function(data) {
+                            Swal.fire(
+                                'Reject!',
+                                'Order has been Reject.',
+                                'success'
+                            ).then(function() {
+                                location.reload()
+                            })
+                        }
+                    });
+                }
+            })
+        });
+    </script>
+@endsection

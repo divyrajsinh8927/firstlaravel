@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\frontend\AddToCartController;
 use App\Http\Controllers\frontend\FrontendProductController;
 use App\Http\Controllers\frontend\OrderProductController;
 use App\Http\Controllers\frontend\HomeController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NotificationSendController;
 use App\Http\Controllers\userManagement;
@@ -52,6 +54,7 @@ Route::controller(CategoryController::class)->group(function () {
     Route::get('/categories', 'getCategoriesForOption')->name('get.categories')->middleware(['auth', 'verified']);
     Route::post('/get/categories', 'getAllCategories')->name('get.All.categories')->middleware(['auth', 'verified']);
     Route::post('/import/categories', 'importCsv')->name('import.categories')->middleware(['auth', 'verified']);
+    Route::get('/mainCategories', 'getMainCategoriesForOption')->name('get.Main.categories')->middleware(['auth', 'verified']);
 });
 
 Route::controller(ProductController::class)->group(function () {
@@ -64,8 +67,16 @@ Route::controller(ProductController::class)->group(function () {
     Route::get('/product-export', 'export')->name('products.export')->middleware(['auth', 'verified']);
 });
 
+Route::controller(AdminOrderController::class)->group(function () {
+    Route::get('/OrderManagement', 'index')->name('Admin.Order.Management')->middleware(['auth', 'verified']);
+    Route::post('/getAllOrders', 'getAllOrders')->name('Admin.All.Orders')->middleware(['auth', 'verified']);
+    Route::delete('/rejectOrder', 'rejectOrder')->name('Admin.Reject.Orders')->middleware(['auth', 'verified']);
+    Route::put('/confirmOrder', 'confirmOrder')->name('Admin.confirm.Orders')->middleware(['auth', 'verified']);
+});
+
 Route::post('/store-token', [NotificationSendController::class, 'updateDeviceToken'])->name('store.token');
 Route::post('/send-web-notification', [NotificationSendController::class, 'sendNotification'])->name('send.web-notification');
+Route::get('/send-SMS-notification', [NotificationSendController::class, 'sendSMS'])->name('send.SMS.notification');
 
 // frontend
 
@@ -88,6 +99,9 @@ Route::controller(AddToCartController::class)->group(function () {
     Route::get('/CartProducts', 'viewCart')->name('frontend.cart.product');
     Route::post('/cartorder', 'placeCartOrder')->name('frontend.cart.order.product');
 });
+
+//log Routs
+Route::get('/logs', [LogController::class, 'getAllLogs']);
 
 // Route::get('/dashboard', function () {
 //     return view('admin.categories');

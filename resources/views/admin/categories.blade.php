@@ -28,6 +28,7 @@
                                 <tr>
                                     <th>SL</th>
                                     <th>Categoryname</th>
+                                    <th>Main Category</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -72,9 +73,15 @@
                             <input type="text" class="form-control" id="txtcategoryName"
                                 placeholder="Enter Category Name" name="txtcategoryName">
                         </div>
+                        <div class="form-group">
+                            <label for="categoryName">Category</label>
+                            <select name="category" id="category" placeholder="Select Category" class="form-control">
+
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer border-top-0 d-flex justify-content-center">
-                        <button class="btn btn-success" style="text-align: right;" id="btn-submit">Submit</button>
+                        <button type="button" class="btn btn-success" style="text-align: right;" id="btn-submit">Submit</button>
                     </div>
                 </form>
             </div>
@@ -102,6 +109,12 @@
                             <input type="hidden" name="categoryId" id="categoryId" />
                             <input type="text" class="form-control" id="txtUpdatecategoryName"
                                 placeholder="Enter Category Name" name="txtUpdatecategoryName" />
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryName">Category</label>
+                            <select name="updateCategory" id="updateCategory" placeholder="Select Categoroy" class="form-control">
+
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer border-top-0 d-flex justify-content-center">
@@ -150,6 +163,9 @@
                             'data': 'category_name',
                         },
                         {
+                            'data': 'category_id',
+                        },
+                        {
                             'data': 'id',
                             'orderable': false,
                             render: function(data, type, row, meta) {
@@ -161,6 +177,40 @@
                             }
                         },
                     ]
+                });
+
+                var filtercategories = [
+                    '<option value="-1" disabled>Select Category</option>'
+                ]
+                $.ajax({
+                    url: "{{ route('get.Main.categories') }}",
+                    type: "GET",
+                    dataType: 'json',
+                    success: function(data) {
+                        for (var i = 0; i < data.length; i++) {
+                            var row = $('<option value=' + data[i].id + '>' + data[i]
+                                .name + '</option>');
+                            filtercategories.push(row)
+                        }
+                        $("#category").html(filtercategories);
+                    }
+                });
+
+                var mainUpCategory = [
+                    '<option value="-1" disabled>Select Category</option>'
+                ]
+                $.ajax({
+                    url: "{{ route('get.Main.categories') }}",
+                    type: "GET",
+                    dataType: 'json',
+                    success: function(data) {
+                        for (var i = 0; i < data.length; i++) {
+                            var row = $('<option value=' + data[i].id + '>' + data[i]
+                                .name + '</option>');
+                                mainUpCategory.push(row)
+                        }
+                        $("#updateCategory").html(mainUpCategory);
+                    }
                 });
 
 
@@ -185,6 +235,9 @@
                 $('#import').submit(function(e) {
                     e.preventDefault();
 
+                    alert("hello");
+                    return false;
+
                     var formData = new FormData(this);
                     $.ajax({
                         type: 'POST',
@@ -202,34 +255,7 @@
                     });
                 });
 
-                //add
-                $("#btn-submit").click(function(e) {
-                    e.preventDefault();
 
-                    var categoryName = $("#txtcategoryName").val();
-
-                    $.ajax({
-                        type: 'POST',
-                        method: 'POST',
-                        url: "{{ route('add.category') }}",
-                        data: {
-                            categoryName: categoryName
-                        },
-                        success: function(data) {
-                            if ($.isEmptyObject(data.error)) {
-                                Swal.fire(
-                                    'Inserted!',
-                                    'Category has been Inserted.',
-                                    'success'
-                                ).then(function() {
-                                    location.reload()
-                                })
-                            } else {
-                                printErrorMsg(data.error);
-                            }
-                        }
-                    });
-                });
 
                 function printErrorMsg(msg) {
                     $(".print-error-msg").find("ul").html('');
@@ -255,6 +281,7 @@
                     success: function(data) {
                         $('#categoryId').val(data.id);
                         $('#txtUpdatecategoryName').val(data.category_name);
+                        $('#updateCategory').val(data.category_id);
                     }
                 });
             });
@@ -267,6 +294,7 @@
 
                 var id = $("#categoryId").val();
                 var updateCategoryName = $("#txtUpdatecategoryName").val();
+                var update_main_category_id = $("#updateCategory").val();
 
                 $.ajax({
                     type: 'POST',
@@ -274,7 +302,8 @@
                     url: "{{ route('update.category') }}",
                     data: {
                         id: id,
-                        updateCategory: updateCategoryName
+                        updateCategory: updateCategoryName,
+                        update_main_category_id: update_main_category_id
                     },
                     success: function(data) {
                         if ($.isEmptyObject(data.error)) {
@@ -336,6 +365,36 @@
                 }
             })
         });
+        //add
+        $("#btn-submit").click(function(e) {
+                    e.preventDefault();
+
+                    var categoryName = $("#txtcategoryName").val();
+                    var main_category_id = $("#category").val();
+
+                    $.ajax({
+                        type: 'POST',
+                        method: 'POST',
+                        url: "{{ route('add.category') }}",
+                        data: {
+                            categoryName: categoryName,
+                            main_category_id: main_category_id
+                        },
+                        success: function(data) {
+                            if (!data.error) {
+                                Swal.fire(
+                                    'Inserted!',
+                                    'Category has been Inserted.',
+                                    'success'
+                                ).then(function() {
+                                    location.reload();
+                                })
+                            } else {
+                                printErrorMsg(data.error);
+                            }
+                        }
+                    });
+                });
     </script>
 
     <script></script>

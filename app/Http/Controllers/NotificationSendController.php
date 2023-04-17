@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Auth;
+use Exception;
+use Twilio\Rest\Client;
 use Carbon\Carbon;
 
 class NotificationSendController extends Controller
@@ -20,7 +22,7 @@ class NotificationSendController extends Controller
         return response()->json(['Token successfully stored.']);
     }
 
-    public function sendNotification($title,$body)
+    public function sendNotification($title, $body)
     {
         $url = 'https://fcm.googleapis.com/fcm/send';
 
@@ -61,5 +63,29 @@ class NotificationSendController extends Controller
         // Close connection
         curl_close($ch);
         // FCM response
+    }
+
+
+    public function sendSMS()
+    {
+        $receiverNumber = "+919687866294";
+        $message = "All About Laravel";
+
+        try {
+
+            $account_sid = getenv("TWILIO_SID");
+            $auth_token = getenv("TWILIO_TOKEN");
+            $twilio_number = getenv("TWILIO_FROM");
+
+            $client = new Client($account_sid, $auth_token);
+            $client->messages->create($receiverNumber, [
+                'from' => $twilio_number,
+                'body' => $message]);
+
+            return "sent";
+
+        } catch (Exception $e) {
+            dd("Error: ". $e->getMessage());
+        }
     }
 }

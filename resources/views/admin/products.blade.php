@@ -83,13 +83,17 @@
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Product Price</label>
-                        <input type="text" class="form-control" id="txtProductPrice" placeholder="Enter Producut Price In Rupees" name="txtProductPrice">
+                        <input type="number" class="form-control" id="txtProductPrice" placeholder="Enter Producut Price In Rupees" name="txtProductPrice">
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Category</label>
                         <select name="category" id="category" placeholder="Select Categoroy" class="form-control">
 
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryName">Product Description</label>
+                        <textarea type="text" class="form-control" id="txtdescription" placeholder="Enter Producut Description" name="txtdescription"></textarea>
                     </div>
                 </div>
                 <div class=" modal-footer border-top-0 d-flex justify-content-center">
@@ -129,13 +133,17 @@
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Product Price</label>
-                        <input type="text" class="form-control" id="txtUpdateProductPrice" placeholder="Enter Producut Price In Rupees" name="txtUpdateProductPrice">
+                        <input type="number" class="form-control" id="txtUpdateProductPrice" placeholder="Enter Producut Price In Rupees" name="txtUpdateProductPrice">
                     </div>
                     <div class="form-group">
                         <label for="categoryName">Category</label>
                         <select name="updateCategory" id="updateCategory" placeholder="Select Categoroy" required class="form-control">
 
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryName">Product Description</label>
+                        <textarea type="text" class="form-control" id="txtUpdateDescription" placeholder="Enter Producut Description" name="txtUpdateDescription"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 d-flex justify-content-center">
@@ -351,7 +359,7 @@
                     contentType: false,
                     processData: false,
                     success: function(data) {
-                        if ($.isEmptyObject(data.error)) {
+                        if (!data.error) {
                             Swal.fire(
                                 'Inserted!',
                                 'Product has been Inserted.',
@@ -404,6 +412,8 @@
                         $('#txtUpdateProductName').val(data.product_name);
                         $('#txtUpdateProductPrice').val(data.Product_price);
                         $('#updateCategory').val(data.category_id);
+                        $('#txtUpdateDescription').val(data.product_description);
+                        $('#txtUpdateProductPrice').val(data.product_price);
                     }
                 });
             });

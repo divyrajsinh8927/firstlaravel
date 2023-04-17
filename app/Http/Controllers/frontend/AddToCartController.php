@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\SendPushNotification;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class AddToCartController extends Controller
@@ -103,40 +104,66 @@ class AddToCartController extends Controller
 
     public function placeCartOrder(Request $request)
     {
+        try {
+            session_start();
+            if ($request->all == "true") {
+                $cartProducts['cart'] = $_SESSION['cart'];
+                foreach ($cartProducts['cart']['product'] as $cartProduct_key => $cartProduct_value) {
+                    $order = orders::insertGetId([
+                        'user_id' => $_SESSION['user'],
+                        'product_id' => $cartProduct_value['product_id'],
+                        'address' => $request->txtAddress,
+                        'quantity' => $cartProduct_value['product_quantity'],
+                        'price' => $cartProduct_value['product_price'],
+                        'created_at' => Carbon::now()
+                    ]);
 
-        session_start();
-        if ($request->all == "true") {
-            $cartProducts['cart'] = $_SESSION['cart'];
-            foreach ($cartProducts['cart']['product'] as $cartProduct_key => $cartProduct_value) {
-                orders::insert([
+                    $order_data = [
+                        'order_id' => $order,
+                        'user_id' => $_SESSION['user'],
+                        'product_id' => $cartProduct_value['product_id'],
+                        'address' => $request->txtAddress,
+                        'quantity' => $cartProduct_value['product_quantity'],
+                        'price' => $cartProduct_value['product_price'],
+                        'created_at' => Carbon::now()
+                    ];
+
+                    saveLogs('success', "Order Placed", $order_data);
+                }
+                $message = "Your Order of " . $cartProduct_value['product_quantity'] . "Is Placed";
+                $NotificationSendController = new NotificationSendController();
+                $NotificationSendController->sendNotification("Order Placed", $message);
+                unset($_SESSION['cart']);
+                return redirect()->intended(RouteServiceProvider::USER_HOME);
+            } else {
+                $cartProducts['cart'] = $_SESSION['cart'];
+                $order = orders::insertGetId([
                     'user_id' => $_SESSION['user'],
-                    'product_id' => $cartProduct_value['product_id'],
+                    'product_id' => $request->product_id,
                     'address' => $request->txtAddress,
-                    'quantity' => $cartProduct_value['product_quantity'],
-                    'price' => $cartProduct_value['product_price'],
+                    'quantity' => $request->txtquantity,
+                    'price' => $request->txtprice,
                     'created_at' => Carbon::now()
                 ]);
+                $order_data = [
+                    'order_id' => $order,
+                    'user_id' => $_SESSION['user'],
+                    'product_id' => $request->product_id,
+                    'address' => $request->txtAddress,
+                    'quantity' => $request->txtquantity,
+                    'price' => $request->txtprice,
+                    'created_at' => Carbon::now()
+                ];
+
+                saveLogs('success', "Order Placed", $order_data);
+                $message = "Your Order of " . $request->txtquantity . $cartProducts['cart']['product'][$request->product_id]['product_name'] . "Is Placed";
+                $NotificationSendController = new NotificationSendController();
+                $NotificationSendController->sendNotification("Order Placed", $message);
+                unset($_SESSION['cart']['product'][$request->product_id]);
+                return redirect()->route('frontend.cart.product');
             }
-            $message = "Your Order of " . $cartProduct_value['product_quantity'] . "Is Placed";
-            $NotificationSendController = new NotificationSendController();
-            $NotificationSendController->sendNotification("Order Placed",$message);
-            unset($_SESSION['cart']);
-            return redirect()->intended(RouteServiceProvider::USER_HOME);
-        } else {
-            $cartProducts['cart'] = $_SESSION['cart'];
-            orders::insert([
-                'user_id' => $_SESSION['user'],
-                'product_id' => $request->product_id,
-                'address' => $request->txtAddress,
-                'quantity' => $request->txtquantity,
-                'price' => $request->txtprice,
-                'created_at' => Carbon::now()
-            ]);
-            $message = "Your Order of " . $request->txtquantity . $cartProducts['cart']['product'][$request->product_id]['product_name'] . "Is Placed";
-            $NotificationSendController = new NotificationSendController();
-            $NotificationSendController->sendNotification("Order Placed",$message);
-            unset($_SESSION['cart']['product'][$request->product_id]);
-            return redirect()->route('frontend.cart.product');
+        } catch (Exception $e) {
+            saveLogs('danger', "Order Not Placed", $e);
         }
     }
 }

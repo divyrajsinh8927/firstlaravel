@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Imports\categoriesImport;
+use App\Models\categories;
 use Illuminate\Support\Facades\Validator;
 use App\Models\sub_categories;
 use Carbon\Carbon;
@@ -63,22 +64,33 @@ class CategoryController extends Controller
 
     public function addCategory(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'categoryName' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->errors()->all()
+        try {
+            $validator = Validator::make($request->all(), [
+                'categoryName' => 'required',
             ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->errors()->all()
+                ]);
+            }
+
+            $sub_category_id = sub_categories::insertGetId([
+                'category_name' => $request->categoryName,
+                'category_id' => $request->main_category_id,
+                'created_at' => Carbon::now()
+            ]);
+            $sub_category_data = [
+                'sub_category_id' => $sub_category_id,
+                'category_name' => $request->categoryName,
+                'category_id' => $request->main_category_id,
+                'created_at' => Carbon::now()
+            ];
+            saveLogs('success', "Category Inserted", $sub_category_data);
+            return response()->json(['success' => 'Category Added successfully.']);
+        } catch (Exception $e) {
+            saveLogs('denger', "Category Not Inserted", $e);
         }
-
-        sub_categories::insert([
-            'category_name' => $request->categoryName,
-            'created_at' => Carbon::now()
-        ]);
-
-        return response()->json(['success' => 'Category Added successfully.']);
     }
 
     public function editCategory(Request $request)
@@ -89,30 +101,53 @@ class CategoryController extends Controller
 
     public function updateCategory(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'updateCategory' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->errors()->all()
+        try {
+            $validator = Validator::make($request->all(), [
+                'updateCategory' => 'required',
             ]);
-        }
 
-        sub_categories::findOrFail($request->id)->update([
-            'category_name' => $request->updateCategory,
-            'updated_at' => Carbon::now(),
-        ]);
-        return response()->json(['success' => 'Category Updated successfully.']);
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->errors()->all()
+                ]);
+            }
+
+            sub_categories::findOrFail($request->id)->update([
+                'category_name' => $request->updateCategory,
+                'category_id' => $request->update_main_category_id,
+                'updated_at' => Carbon::now()
+            ]);
+            $sub_category_data = [
+                'sub_category_id' => $request->id,
+                'category_name' => $request->updateCategory,
+                'category_id' => $request->update_main_category_id,
+                'updated_at' => Carbon::now()
+            ];
+            saveLogs('success', "Category Updated", $sub_category_data);
+            return response()->json(['success' => 'Category Updated successfully.']);
+        } catch (Exception $e) {
+            saveLogs('denger', "Category Not Updated", $e);
+            return response()->json(['error' => $e]);
+        }
     }
 
     public function deleteCategory(Request $request)
     {
-        $updateCategory = sub_categories::findOrFail($request->id)->update([
-            'isDelete' => 1,
-            'updated_at' => Carbon::now(),
-        ]);
-        return response()->json(['success' => 'Category Deleted successfully.']);
+        try {
+            $updateCategory = sub_categories::findOrFail($request->id)->update([
+                'isDelete' => 1,
+                'updated_at' => Carbon::now(),
+            ]);
+            $sub_category_data = [
+                'sub_category_id' => $request->id,
+                'isDelete' => 1,
+                'updated_at' => Carbon::now(),
+            ];
+            saveLogs('success', "Category Deleted", $sub_category_data);
+            return response()->json(['success' => 'Category Deleted successfully.']);
+        } catch (Exception $e) {
+            saveLogs('denger', "Category Not Deleted", $e);
+        }
     }
 
     public function getCategoriesForOption()
@@ -121,6 +156,11 @@ class CategoryController extends Controller
         return response()->json($categories);
     }
 
+    public function getMainCategoriesForOption()
+    {
+        $categories = categories::where('isDelete', 0)->get();
+        return response()->json($categories);
+    }
 
 
     public function importCsv(Request $request)
@@ -141,11 +181,10 @@ class CategoryController extends Controller
         }
         if (!in_array("category_name", $header_row)) {
             $printMessage = "<tr><td><span style='color: red;'>Category_name Column Not Found</span><td><tr>";
-            array_push($notFound,$printMessage);
+            array_push($notFound, $printMessage);
         }
 
-        if(!empty($notFound))
-        {
+        if (!empty($notFound)) {
             return $notFound;
         }
         // return "<tr><td><span style='color: red;'> category_name Column Required </span><td><tr>";
@@ -174,6 +213,5 @@ class CategoryController extends Controller
         $allErrors = array_merge($skipedRowsNumber, $duplicateEntry);
         $lastAllData = array_merge($allErrors, $insertrow);
         return $lastAllData;
-
     }
 }

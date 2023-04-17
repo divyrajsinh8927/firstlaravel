@@ -6,7 +6,6 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Datatable - srtdash</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="{{ asset('admin/assets/media/icon/favicon.ico') }}">
     <link rel="stylesheet" href="{{ asset('admin/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/assets/css/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/assets/css/themify-icons.css') }}">
@@ -21,10 +20,8 @@
     <!-- Start datatable css -->
     <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/jquery.dataTables.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/dataTables.bootstrap4.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('admin/assets/css/responsive.bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('admin/assets/css/responsive.jqueryui.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/responsive.bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/responsive.jqueryui.min.css') }}">
     <!-- style css -->
     <link rel="stylesheet" href="{{ asset('admin/assets/css/typography.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/assets/css/default-css.css') }}">
@@ -73,7 +70,8 @@
                                     <span>Categories</span></a></li>
                             <li><a href="{{ route('admin.products') }}"><i class="ti-receipt"></i>
                                     <span>Products</span></a></li>
-
+                            <li><a href="{{ route('Admin.Order.Management') }}"><i class="ti-receipt"></i>
+                                    <span>Orders</span></a></li>
 
                         </ul>
                     </nav>

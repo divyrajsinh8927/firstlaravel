@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use App\Exports\ProductExport;
+use Exception;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
@@ -22,33 +23,47 @@ class ProductController extends Controller
 
     public function addproduct(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'productImage' => 'required',
-            'txtProductName' => 'required',
-            'txtProductPrice' => 'required',
-            'category' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->errors()->all()
+        try {
+            $validator = Validator::make($request->all(), [
+                'productImage' => 'required',
+                'txtProductName' => 'required',
+                'txtProductPrice' => 'required',
+                'category' => 'required',
             ]);
-        }
 
-        if ($request->file('productImage')) {
-            $image = $request->file('productImage');
-            $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
-            $image->move(base_path('\public\media'), $name_gen);
-            $save_url = 'media/' . $name_gen;
-        }
-        product::insert([
-            'product_name' => $request->txtProductName,
-            'product_image' => $save_url,
-            'product_price' => $request->txtProductPrice,
-            'category_id' => $request->category,
-            'created_at' => Carbon::now()
-        ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->errors()->all()
+                ]);
+            }
 
+            if ($request->file('productImage')) {
+                $image = $request->file('productImage');
+                $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
+                $image->move(base_path('\public\media'), $name_gen);
+                $save_url = 'media/' . $name_gen;
+            }
+            $product_id = product::insertGetId([
+                'product_name' => $request->txtProductName,
+                'product_image' => $save_url,
+                'product_price' => $request->txtProductPrice,
+                'category_id' => $request->category,
+                'product_description' => $request->txtdescription,
+                'created_at' => Carbon::now()
+            ]);
+            $product_data = [
+                'product_id' => $product_id,
+                'product_name' => $request->txtProductName,
+                'product_image' => $save_url,
+                'product_price' => $request->txtProductPrice,
+                'category_id' => $request->category,
+                'created_at' => Carbon::now()
+            ];
+            saveLogs('success', "Product Inserted", $product_data);
+        } catch (Exception $e) {
+            saveLogs('danger', "Product Not Inserted", $e);
+            return response()->json(['error' => 'Product Added successfully.']);
+        }
         return response()->json(['success' => 'Product Added successfully.']);
     }
 
@@ -60,45 +75,71 @@ class ProductController extends Controller
 
     public function updateProduct(Request $request)
     {
-        $updatevalidator = Validator::make($request->all(), [
-            'txtUpdateProductName' => 'required',
-            'txtUpdateProductPrice' => 'required',
-            'updateCategory' => 'required',
-        ]);
-
-        if ($updatevalidator->fails()) {
-            return response()->json([
-                'error' => $updatevalidator->errors()->all()
+        try {
+            $updatevalidator = Validator::make($request->all(), [
+                'txtUpdateProductName' => 'required',
+                'txtUpdateProductPrice' => 'required',
+                'updateCategory' => 'required',
             ]);
+
+            if ($updatevalidator->fails()) {
+                return response()->json([
+                    'error' => $updatevalidator->errors()->all()
+                ]);
+            }
+
+            $editProduct = product::findOrFail($request->updateid);
+            if ($request->file('updateProductImage')) {
+                $image = $request->file('updateProductImage');
+                $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
+                $image->move(base_path('\public\media'), $name_gen);
+                $save_url = 'media/' . $name_gen;
+            } else {
+                $save_url = $editProduct->product_image;
+            }
+
+            product::findOrFail($request->updateid)->update([
+                'product_name' => $request->txtUpdateProductName,
+                'product_image' => $save_url,
+                'product_price' => $request->txtUpdateProductPrice,
+                'category_id' => $request->updateCategory,
+                'product_description' => $request->txtUpdateDescription,
+                'updated_at' => Carbon::now()
+            ]);
+
+            $product_data = [
+                'product_id' => $request->updateid,
+                'product_name' => $request->txtUpdateProductName,
+                'product_image' => $save_url,
+                'product_price' => $request->txtUpdateProductPrice,
+                'category_id' => $request->updateCategory,
+                'product_description' => $request->txtUpdateDescription,
+                'updated_at' => Carbon::now(),
+            ];
+            saveLogs('success', "Product Updated", $product_data);
+        } catch (Exception $e) {
+            saveLogs('danger', "Product Not Updated", $e);
         }
-
-        $editProduct = product::findOrFail($request->updateid);
-        if ($request->file('updateProductImage')) {
-            $image = $request->file('updateProductImage');
-            $name_gen = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
-            $image->move(base_path('\public\media'), $name_gen);
-            $save_url = 'media/' . $name_gen;
-        }
-
-
-        $save_url = $editProduct->product_image;
-        product::findOrFail($request->updateid)->update([
-            'product_name' => $request->txtUpdateProductName,
-            'product_image' => $save_url,
-            'product_price' => $request->txtUpdateProductPrice  ,
-            'category_id' => $request->updateCategory,
-            'updated_at' => Carbon::now()
-        ]);
 
         return response()->json(['success' => 'Product Updated successfully.']);
     }
 
     public function deleteProduct(Request $request)
     {
-        product::findOrFail($request->id)->update([
-            'isDelete' => 1,
-            'updated_at' => Carbon::now(),
-        ]);
+        try {
+            product::findOrFail($request->id)->update([
+                'isDelete' => 1,
+                'updated_at' => Carbon::now(),
+            ]);
+            $product_data = [
+                'product_id' => $request->id,
+                'isDelete' => 1,
+                'updated_at' => Carbon::now(),
+            ];
+            saveLogs('success', "Product Updated", $product_data);
+        } catch (Exception $e) {
+            saveLogs('danger', "Product Not Deleted", $e);
+        }
 
         return response()->json(['success' => 'Product Deleted successfully.']);
     }
@@ -122,7 +163,7 @@ class ProductController extends Controller
         $order = $request->order[0]['dir'];
         $totalProduct = product::where('isDelete', 0)->get()->count();
         if ($category_id == 0) {
-            $products = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price' ,'products.isDelete', 'sub_categories.category_name as category_name')
+            $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
                 ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
                     global $search;
                     $query->where('products.product_name', 'LIKE', '%' . $search . '%')
@@ -130,7 +171,7 @@ class ProductController extends Controller
                         ->orWhere('sub_categories.category_name', 'LIKE', '%' . $search . '%');
                 })->skip($start)->take($length)
                 ->orderBy($orderColumnName, $order)->get();
-            $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
+            $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
                 ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where(function ($query) {
                     global $search;
                     $query->where('products.product_name', 'LIKE', '%' . $search . '%')
@@ -149,15 +190,15 @@ class ProductController extends Controller
             );
             return response()->json($res);
         }
-        $products = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
+        $products = product::select('products.id', 'products.product_name', 'products.product_image', 'products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
             ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
                 global $search;
                 $query->where('products.product_name', 'LIKE', '%' . $search . '%')
                     ->orWhere('products.id', 'LIKE', '%' . $search . '%')
                     ->orWhere('sub_categories.category_name', 'LIKE', '%' . $search . '%');
             })->skip($start)->take($length)->get();
-            
-        $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image','products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
+
+        $filterdproducts = product::select('products.id', 'products.product_name', 'products.product_image', 'products.product_price', 'products.isDelete', 'sub_categories.category_name as category_name')
             ->join('sub_categories', 'sub_categories.id', '=', 'products.category_id')->where('products.isDelete', '=', 0)->where('products.category_id', '=', $category_id)->where(function ($query) {
                 global $search;
                 $query->where('products.product_name', 'LIKE', '%' . $search . '%')
@@ -201,7 +242,7 @@ class ProductController extends Controller
         $query = "SELECT products.id, products.product_name,products.product_price, products.isDelete, sub_categories.category_name FROM products LEFT JOIN sub_categories ON products.category_id = sub_categories.id $where_sql ORDER BY $orderColumn $order";
         $products = DB::select($query);
 
-        $headers = array("id", "product_name", "category_name","produuct_price");
+        $headers = array("id", "product_name", "category_name", "produuct_price");
         $filename = 'products' . date('d_m_Y_H_i_s');
         header("Content-type: application/csv");
         header("Content-Disposition: attachment; filename=\"$filename" . ".csv\"");
