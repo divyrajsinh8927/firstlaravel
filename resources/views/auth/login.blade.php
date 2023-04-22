@@ -67,7 +67,7 @@
         </section>
         <!-- JS -->
         <script src="{{ asset('admin/assets/js/vendor/jquery/jquery.min.js') }}"></script>
-        <script src="{{ asset('admin/assetsjs/main.js') }}"></script>
+        <script src="{{ asset('admin/assets/js/main.js') }}"></script>
         <script type="module">
             // Import the functions you need from the SDKs you need
             import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
